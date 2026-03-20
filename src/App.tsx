@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { AdminProvider } from './contexts/AdminContext'
+import { RefetchProvider } from './contexts/RefetchContext'
 import { useAdmin } from './hooks/useAdmin'
 import { Header } from './components/layout/Header'
 import { Footer } from './components/layout/Footer'
@@ -15,7 +16,7 @@ import { useMemories } from './hooks/useMemories'
 
 function AppContent() {
   const { isAdmin, showHidden } = useAdmin()
-  const { memories, loading, submitMemory } = useMemories(isAdmin && showHidden)
+  const { memories, loading, submitMemory, refetch } = useMemories(isAdmin && showHidden)
   const [submitOpen, setSubmitOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
 
@@ -47,6 +48,7 @@ function AppContent() {
   }
 
   return (
+    <RefetchProvider value={refetch}>
     <div className="min-h-screen bg-navy">
       <Header
         onSubmitClick={() => setSubmitOpen(true)}
@@ -101,6 +103,7 @@ function AppContent() {
         </svg>
       </button>
     </div>
+    </RefetchProvider>
   )
 }
 
