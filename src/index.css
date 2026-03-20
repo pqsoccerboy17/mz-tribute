@@ -297,3 +297,67 @@ body {
 .memory-card-accent:hover::before {
   opacity: 1;
 }
+
+/* ============================================
+   Video Display Utilities
+   ============================================ */
+
+/* "VIDEO" label badge on thumbnails */
+.video-badge {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-bvb-yellow);
+  background: rgba(10, 22, 40, 0.85);
+  padding: 1px 5px;
+  border-radius: 3px;
+  backdrop-filter: blur(4px);
+}
+
+/* Play button overlay for video thumbnails */
+.video-play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 22, 40, 0.3);
+  transition: background 0.2s;
+}
+
+.video-play-overlay:hover {
+  background: rgba(10, 22, 40, 0.15);
+}
+
+.video-play-overlay svg {
+  filter: drop-shadow(0 0 8px rgba(253, 225, 0, 0.4));
+}
+
+/* Broadcast frame for lightbox video */
+.broadcast-frame {
+  border-top: 2px solid rgba(253, 225, 0, 0.15);
+  border-bottom: 2px solid rgba(253, 225, 0, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 0 40px rgba(253, 225, 0, 0.04);
+}
+
+/* Shimmer loading placeholder */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.thumbnail-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-navy-lighter) 25%,
+    rgba(253, 225, 0, 0.04) 50%,
+    var(--color-navy-lighter) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}

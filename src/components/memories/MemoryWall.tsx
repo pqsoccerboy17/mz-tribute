@@ -74,11 +74,12 @@ export function MemoryWall({ memories, loading }: MemoryWallProps) {
         {/* Featured */}
         {featured.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            {featured.map((memory) => (
+            {featured.map((memory, i) => (
               <MemoryCard
                 key={memory.id}
                 memory={memory}
                 onSelect={setSelectedMemory}
+                index={i}
               />
             ))}
           </div>
@@ -86,11 +87,12 @@ export function MemoryWall({ memories, loading }: MemoryWallProps) {
 
         {/* Masonry */}
         <div className="masonry-grid">
-          {rest.map((memory) => (
+          {rest.map((memory, i) => (
             <MemoryCard
               key={memory.id}
               memory={memory}
               onSelect={setSelectedMemory}
+              index={i}
             />
           ))}
         </div>

@@ -1,36 +1,68 @@
 import { useState } from 'react'
-import { Image as ImageIcon, Play } from 'lucide-react'
+import { Image as ImageIcon, Play, Film } from 'lucide-react'
+import { motion } from 'motion/react'
 import type { Memory } from '../../lib/types'
 import { cn, formatDate, truncate } from '../../lib/utils'
-import { useIntersection } from '../../hooks/useIntersection'
+import { useVideoThumbnail } from '../../hooks/useVideoThumbnail'
 
 interface MemoryCardProps {
   memory: Memory
   onSelect: (memory: Memory) => void
+  index?: number
 }
 
-export function MemoryCard({ memory, onSelect }: MemoryCardProps) {
+function isVideoUrl(url: string) {
+  return /\.(mp4|mov|webm)$/i.test(url)
+}
+
+function VideoThumbnail({ url }: { url: string }) {
+  const { thumbnail, loading } = useVideoThumbnail(url, true)
+
+  return (
+    <div className="relative w-20 h-20 sm:w-16 sm:h-16 rounded-lg overflow-hidden ring-1 ring-bvb-yellow/15">
+      {loading || !thumbnail ? (
+        <div className={cn('w-full h-full', loading ? 'thumbnail-shimmer' : 'bg-navy-lighter')}>
+          <div className="video-play-overlay">
+            <Play className="w-6 h-6 text-bvb-yellow" />
+          </div>
+        </div>
+      ) : (
+        <>
+          <img src={thumbnail} alt="" className="w-full h-full object-cover" />
+          <div className="video-play-overlay">
+            <Play className="w-5 h-5 text-bvb-yellow fill-bvb-yellow/30" />
+          </div>
+        </>
+      )}
+      <span className="video-badge">Video</span>
+    </div>
+  )
+}
+
+export function MemoryCard({ memory, onSelect, index = 0 }: MemoryCardProps) {
   const [expanded, setExpanded] = useState(false)
-  const { ref, isVisible } = useIntersection({ threshold: 0.15 })
 
   const hasMedia = memory.media_urls.length > 0
+  const hasVideo = hasMedia && memory.media_urls.some(isVideoUrl)
   const isLong = (memory.content?.length || 0) > 200
   const displayText = expanded
     ? memory.content || ''
     : truncate(memory.content || '', 200)
 
   return (
-    <div
-      ref={ref}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.4, ease: 'easeOut', delay: Math.min(index * 0.05, 0.3) }}
       className={cn(
         'group relative bg-navy-light rounded-xl p-5 cursor-pointer memory-card-accent',
         'border border-white/[0.04] hover:border-bvb-yellow/20',
         'transition-all duration-300',
         'hover:-translate-y-0.5 hover:shadow-lg hover:shadow-bvb-yellow/[0.03]',
         memory.is_featured && 'border-l-[3px] border-l-bvb-yellow bg-gradient-to-r from-bvb-yellow/[0.03] to-transparent',
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+        hasVideo && 'border-t-[2px] border-t-bvb-yellow/10'
       )}
-      style={{ transition: 'opacity 0.5s ease, transform 0.5s ease, border-color 0.3s, box-shadow 0.3s' }}
       onClick={() => onSelect(memory)}
     >
       {/* Author + era tag */}
@@ -68,27 +100,25 @@ export function MemoryCard({ memory, onSelect }: MemoryCardProps) {
       {/* Media thumbnails */}
       {hasMedia && (
         <div className="flex gap-2 mb-3">
-          {memory.media_urls.slice(0, 3).map((url, i) => (
-            <div
-              key={i}
-              className="relative w-16 h-16 rounded-lg bg-navy-lighter overflow-hidden ring-1 ring-white/5"
-            >
-              {url.match(/\.(mp4|mov|webm)$/i) ? (
-                <div className="w-full h-full flex items-center justify-center bg-navy-lighter">
-                  <Play className="w-5 h-5 text-bvb-yellow/50" />
-                </div>
-              ) : (
+          {memory.media_urls.slice(0, 3).map((url, i) =>
+            isVideoUrl(url) ? (
+              <VideoThumbnail key={i} url={url} />
+            ) : (
+              <div
+                key={i}
+                className="relative w-20 h-20 sm:w-16 sm:h-16 rounded-lg bg-navy-lighter overflow-hidden ring-1 ring-white/5"
+              >
                 <img
                   src={url}
                   alt=""
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
-              )}
-            </div>
-          ))}
+              </div>
+            )
+          )}
           {memory.media_urls.length > 3 && (
-            <div className="w-16 h-16 rounded-lg bg-navy-lighter flex items-center justify-center ring-1 ring-white/5">
+            <div className="w-20 h-20 sm:w-16 sm:h-16 rounded-lg bg-navy-lighter flex items-center justify-center ring-1 ring-white/5">
               <span className="text-text-muted text-xs">
                 +{memory.media_urls.length - 3}
               </span>
@@ -97,12 +127,12 @@ export function MemoryCard({ memory, onSelect }: MemoryCardProps) {
         </div>
       )}
 
-      {/* Footer -- matchday programme style */}
+      {/* Footer */}
       <div className="flex items-center gap-3 text-text-muted text-xs pt-2 border-t border-white/[0.04]">
         <time>{formatDate(memory.whatsapp_timestamp || memory.created_at)}</time>
         {hasMedia && (
           <span className="flex items-center gap-1">
-            <ImageIcon className="w-3 h-3" />
+            {hasVideo ? <Film className="w-3 h-3 text-bvb-yellow/50" /> : <ImageIcon className="w-3 h-3" />}
             {memory.media_urls.length}
           </span>
         )}
@@ -110,6 +140,6 @@ export function MemoryCard({ memory, onSelect }: MemoryCardProps) {
           <span className="text-pitch-green-light text-[10px] uppercase tracking-wider">WhatsApp</span>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }
