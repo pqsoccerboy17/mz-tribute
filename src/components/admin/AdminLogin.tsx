@@ -9,7 +9,6 @@ interface AdminLoginProps {
 
 export function AdminLogin({ isOpen, onClose }: AdminLoginProps) {
   const { login } = useAdmin()
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -22,9 +21,8 @@ export function AdminLogin({ isOpen, onClose }: AdminLoginProps) {
     setSubmitting(true)
 
     try {
-      await login(email, password)
+      await login(password)
       onClose()
-      setEmail('')
       setPassword('')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
@@ -50,24 +48,9 @@ export function AdminLogin({ isOpen, onClose }: AdminLoginProps) {
         </button>
 
         <h2 className="font-display text-xl text-cream mb-1">Admin Login</h2>
-        <p className="text-text-muted text-sm mb-5">Site administration access</p>
+        <p className="text-text-muted text-sm mb-5">Enter admin password</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="admin-email" className="block text-text-secondary text-sm mb-1">
-              Email
-            </label>
-            <input
-              id="admin-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              className="w-full bg-navy border border-white/10 rounded-lg px-3 py-2 text-cream text-sm focus:outline-none focus:border-bvb-yellow/40 transition-colors"
-            />
-          </div>
-
           <div>
             <label htmlFor="admin-password" className="block text-text-secondary text-sm mb-1">
               Password
@@ -78,6 +61,7 @@ export function AdminLogin({ isOpen, onClose }: AdminLoginProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoFocus
               autoComplete="current-password"
               className="w-full bg-navy border border-white/10 rounded-lg px-3 py-2 text-cream text-sm focus:outline-none focus:border-bvb-yellow/40 transition-colors"
             />

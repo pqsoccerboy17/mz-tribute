@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 export interface AdminContextValue {
   isAdmin: boolean
   loading: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (password: string) => Promise<void>
   logout: () => void
   showHidden: boolean
   toggleShowHidden: () => void
@@ -40,8 +40,10 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const login = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const ADMIN_EMAIL = 'michaelduncan17@gmail.com'
+
+  const login = useCallback(async (password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email: ADMIN_EMAIL, password })
     if (error) throw error
   }, [])
 
