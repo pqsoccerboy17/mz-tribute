@@ -237,6 +237,23 @@ body {
   animation: drift 20s ease-in-out infinite;
 }
 
+/* Infinity lemniscate -- golden comet tracing the eternal path */
+@keyframes infinity-flow {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -190; }
+}
+
+.infinity-trace {
+  stroke-dasharray: 30 160;
+  animation: infinity-flow 4.5s linear infinite;
+}
+
+.infinity-glow {
+  stroke-dasharray: 30 160;
+  animation: infinity-flow 4.5s linear infinite;
+  filter: blur(3px);
+}
+
 /* ============================================
    Section Divider -- pitch line style
    ============================================ */

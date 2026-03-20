@@ -3,12 +3,12 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { MOCK_MEMORIES } from '../lib/mock-data'
 import type { Memory, MemoryInsert } from '../lib/types'
 
-export function useMemories() {
+export function useMemories(includeHidden = false) {
   const [memories, setMemories] = useState<Memory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  /** Fetch all approved memories, newest first */
+  /** Fetch memories, newest first. Admin can include hidden ones. */
   const fetchMemories = useCallback(async () => {
     if (!isSupabaseConfigured) {
       setMemories(MOCK_MEMORIES)
@@ -17,11 +17,16 @@ export function useMemories() {
     }
 
     try {
-      const { data, error: fetchError } = await supabase
+      let query = supabase
         .from('memories')
         .select('*')
-        .eq('is_approved', true)
         .order('created_at', { ascending: false })
+
+      if (!includeHidden) {
+        query = query.eq('is_approved', true)
+      }
+
+      const { data, error: fetchError } = await query
 
       if (fetchError) throw fetchError
       setMemories(data || [])
@@ -30,7 +35,7 @@ export function useMemories() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [includeHidden])
 
   /** Submit a new memory */
   const submitMemory = useCallback(
@@ -70,7 +75,7 @@ export function useMemories() {
     []
   )
 
-  /** Subscribe to real-time inserts */
+  /** Subscribe to real-time changes */
   useEffect(() => {
     fetchMemories()
 
@@ -84,10 +89,37 @@ export function useMemories() {
           event: 'INSERT',
           schema: 'public',
           table: 'memories',
-          filter: 'is_approved=eq.true',
         },
         (payload) => {
-          setMemories((prev) => [payload.new as Memory, ...prev])
+          const newMemory = payload.new as Memory
+          if (!includeHidden && !newMemory.is_approved) return
+          setMemories((prev) => [newMemory, ...prev])
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'memories',
+        },
+        (payload) => {
+          const updated = payload.new as Memory
+          setMemories((prev) =>
+            prev.map((m) => (m.id === updated.id ? updated : m))
+          )
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'memories',
+        },
+        (payload) => {
+          const deleted = payload.old as { id: string }
+          setMemories((prev) => prev.filter((m) => m.id !== deleted.id))
         }
       )
       .subscribe()
@@ -95,7 +127,7 @@ export function useMemories() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [fetchMemories])
+  }, [fetchMemories, includeHidden])
 
   return { memories, loading, error, submitMemory, refetch: fetchMemories }
 }

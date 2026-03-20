@@ -1,11 +1,14 @@
-import { X, Image as ImageIcon } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import type { Memory } from '../../lib/types'
 import { formatDate } from '../../lib/utils'
 import { useVideoThumbnail } from '../../hooks/useVideoThumbnail'
+import { useModalNavigation } from '../../hooks/useModalNavigation'
 
 interface MemoryDetailProps {
-  memory: Memory
+  memories: Memory[]
+  currentIndex: number
+  onNavigate: (index: number) => void
   onClose: () => void
 }
 
@@ -30,7 +33,15 @@ function DetailVideo({ url }: { url: string }) {
   )
 }
 
-export function MemoryDetail({ memory, onClose }: MemoryDetailProps) {
+export function MemoryDetail({ memories, currentIndex, onNavigate, onClose }: MemoryDetailProps) {
+  const memory = memories[currentIndex]
+  const { hasPrev, hasNext, goNext, goPrev } = useModalNavigation({
+    totalItems: memories.length,
+    currentIndex,
+    onNavigate,
+    onClose,
+  })
+
   const videos = memory.media_urls.filter(isVideoUrl)
   const photos = memory.media_urls.filter((url) => !isVideoUrl(url))
 
@@ -43,7 +54,50 @@ export function MemoryDetail({ memory, onClose }: MemoryDetailProps) {
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       >
+        {/* Counter */}
+        <div className="absolute top-4 left-4 z-10">
+          <span className="text-bvb-yellow text-sm font-medium tabular-nums">
+            {currentIndex + 1} / {memories.length}
+          </span>
+        </div>
+
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+        >
+          <X className="w-6 h-6 text-white" />
+        </button>
+
+        {/* Nav: Previous */}
+        {hasPrev && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              goPrev()
+            }}
+            className="absolute left-2 sm:left-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+          >
+            <ChevronLeft className="w-6 h-6 text-white" />
+          </button>
+        )}
+
+        {/* Nav: Next */}
+        {hasNext && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              goNext()
+            }}
+            className="absolute right-2 sm:right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+          >
+            <ChevronRight className="w-6 h-6 text-white" />
+          </button>
+        )}
+
+        {/* Content panel */}
         <motion.div
+          key={currentIndex}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
@@ -51,14 +105,6 @@ export function MemoryDetail({ memory, onClose }: MemoryDetailProps) {
           className="relative bg-navy-light border border-white/10 rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 sm:p-8"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full hover:bg-navy-lighter transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5 text-text-secondary" />
-          </button>
-
           {/* Author */}
           <div className="mb-4">
             <h2 className="font-display text-2xl text-cream">

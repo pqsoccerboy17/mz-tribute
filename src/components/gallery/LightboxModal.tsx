@@ -1,7 +1,7 @@
-import { useEffect, useCallback } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useVideoThumbnail } from '../../hooks/useVideoThumbnail'
+import { useModalNavigation } from '../../hooks/useModalNavigation'
 
 interface LightboxItem {
   url: string
@@ -42,26 +42,12 @@ export function LightboxModal({
   onNavigate,
 }: LightboxModalProps) {
   const item = items[currentIndex]
-  const hasPrev = currentIndex > 0
-  const hasNext = currentIndex < items.length - 1
-
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-      if (e.key === 'ArrowLeft' && hasPrev) onNavigate(currentIndex - 1)
-      if (e.key === 'ArrowRight' && hasNext) onNavigate(currentIndex + 1)
-    },
-    [currentIndex, hasPrev, hasNext, onClose, onNavigate]
-  )
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown)
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = ''
-    }
-  }, [handleKeyDown])
+  const { hasPrev, hasNext, goNext, goPrev } = useModalNavigation({
+    totalItems: items.length,
+    currentIndex,
+    onNavigate,
+    onClose,
+  })
 
   return (
     <AnimatePresence>
@@ -96,7 +82,7 @@ export function LightboxModal({
           <button
             onClick={(e) => {
               e.stopPropagation()
-              onNavigate(currentIndex - 1)
+              goPrev()
             }}
             className="absolute left-2 sm:left-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
           >
@@ -109,7 +95,7 @@ export function LightboxModal({
           <button
             onClick={(e) => {
               e.stopPropagation()
-              onNavigate(currentIndex + 1)
+              goNext()
             }}
             className="absolute right-2 sm:right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
           >

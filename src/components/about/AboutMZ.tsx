@@ -1,32 +1,13 @@
-import { useState, useEffect } from 'react'
 import { Container } from '../layout/Container'
 import { useIntersection } from '../../hooks/useIntersection'
 import { cn } from '../../lib/utils'
-
-/** Counter that slowly ticks up forever -- MZ's impact never stops growing */
-function ForeverCounter() {
-  const [count, setCount] = useState(130)
-
-  useEffect(() => {
-    // Tick up by 1 every 12 seconds -- slow and reverent
-    const interval = setInterval(() => {
-      setCount((c) => c + 1)
-    }, 12000)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  return (
-    <span className="tabular-nums">
-      {count.toLocaleString()}
-    </span>
-  )
-}
+import { InfinitySymbol } from './InfinitySymbol'
+import { LifeTimeline } from './LifeTimeline'
 
 const STATS = [
-  { number: '40+', label: 'Seasons' },
-  { number: 'forever', label: 'Lives Touched', sublabel: 'and counting' },
-  { number: '1983', label: 'First Whistle' },
+  { number: '42', label: 'Years at SSU' },
+  { number: 'infinity', label: 'Lives Touched', sublabel: 'and counting' },
+  { number: '2002', label: 'National Champions' },
   { number: 'BVB', label: 'Bis zum Tod', sublabel: 'Until death' },
 ]
 
@@ -53,32 +34,56 @@ export function AboutMZ() {
 
         <div className="space-y-6 text-text-secondary leading-relaxed">
           <p>
-            Marcus Ziemer coached SSU Men's Soccer for over 40 years, from 1983 to 2025.
-            In that time, he built one of the most respected programs in Division II -- not
-            just for the wins, but for the culture. Every player who came through Sonoma State
-            left with something bigger than a record on a stat sheet. They left with brothers.
+            Marcus Ziemer first walked onto the SSU campus in 1983 as a two-time
+            all-conference player. He never left. From player to assistant coach
+            under Peter Reynaud in 1989, to head coach in 1991, MZ spent 42 years
+            building one of Division II's most respected programs. His career record
+            of 360-200-70 included a 2002 NCAA National Championship, 8 CCAA
+            conference titles, and 6 Coach of the Year honors. But ask any of his
+            players, and they won't lead with the wins. They'll tell you about the
+            culture.
           </p>
 
           <p>
-            MZ was a music guy. Van Morrison was gospel. Road trips had soundtracks. Concerts
-            were team bonding. He believed that culture wasn't something you talked about -- it
-            was something you lived. And he lived it louder than anyone.
+            Soccer wasn't just Marcus's career -- it was the family bloodline. His
+            wife Trish was an SSU women's soccer star and part of the 1990 NCAA D-II
+            national championship team. Their son Thomas played at the highest youth
+            levels. Daughter Taylor went pro, currently playing for 1. FC Koln in
+            Germany's Frauen-Bundesliga. Daughter Tera was named Division II National
+            Player of the Year in 2022 at Western Washington. His brothers -- Ben
+            (BZ), Chris (CZ), and Andrew (AZ) -- all coach across Northern
+            California. Their father Herb started the Sebastopol Youth Soccer League
+            in 1975. The Ziemers didn't just play the game. They grew it across an
+            entire region.
           </p>
 
           <p>
-            He loved European football with his whole heart, especially Borussia Dortmund.
-            Traveling to Germany with his brothers -- Ben (BZ), Chris (CZ), and Andrew (AZ) --
-            for BVB matches was sacred. His last adventure was exactly that: a trip to Dortmund
-            in March 2026, singing "You'll Never Walk Alone" in the stands with thousands of
-            others. It was the last message he shared with his 130+ alumni family on WhatsApp.
+            MZ was a music guy. Van Morrison was gospel. Road trips had soundtracks.
+            Concerts were team bonding. He believed that culture wasn't something you
+            talked about -- it was something you lived. And he lived it louder than
+            anyone.
           </p>
 
           <p>
-            Marcus passed away on March 15, 2026, from an accident in Germany. The outpouring
-            of love from his players, colleagues, and friends has been overwhelming. This site
-            exists to collect and preserve those memories -- the stories, the photos, the inside
-            jokes, and the moments that made MZ who he was.
+            He loved European football with his whole heart, especially Borussia
+            Dortmund. Traveling to Germany with his brothers for BVB matches was
+            sacred. His last adventure was exactly that: watching BVB beat Augsburg
+            2-0 at Signal Iduna Park on March 14, 2026, then sharing "You'll Never
+            Walk Alone" with his 130+ alumni family on WhatsApp. It was the last
+            message they'd receive from their coach.
           </p>
+
+          <p>
+            Marcus passed away on March 17, 2026, from injuries sustained in an
+            accident after the match. He was 63. Trish and Taylor were with him. The
+            outpouring of love from his players, colleagues, and the soccer community
+            has been overwhelming. This site exists to collect and preserve those
+            memories -- the stories, the photos, the inside jokes, and the moments
+            that made MZ who he was.
+          </p>
+
+          {/* Life timeline -- milestones from birth to forever */}
+          <LifeTimeline isVisible={isVisible} />
 
           {/* Legacy stats -- matchday programme layout */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-10">
@@ -88,7 +93,11 @@ export function AboutMZ() {
                 className="stat-card text-center p-5 rounded-xl bg-navy-lighter/80 border border-white/[0.04]"
               >
                 <div className="font-display text-2xl sm:text-3xl text-bvb-yellow mb-1">
-                  {stat.number === 'forever' ? <ForeverCounter /> : stat.number}
+                  {stat.number === 'infinity' ? (
+                    <InfinitySymbol isVisible={isVisible} />
+                  ) : (
+                    stat.number
+                  )}
                 </div>
                 <div className="text-text-muted text-[10px] uppercase tracking-[0.15em]">
                   {stat.label}

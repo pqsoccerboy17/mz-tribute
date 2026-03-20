@@ -1,12 +1,14 @@
 import { useState, useMemo } from 'react'
-import { Play, Image as ImageIcon } from 'lucide-react'
+import { Play, Image as ImageIcon, EyeOff, RotateCw } from 'lucide-react'
 import { motion } from 'motion/react'
 import type { Memory } from '../../lib/types'
 import { Container } from '../layout/Container'
 import { LightboxModal } from './LightboxModal'
 import { useIntersection } from '../../hooks/useIntersection'
 import { useVideoThumbnail } from '../../hooks/useVideoThumbnail'
-import { cn } from '../../lib/utils'
+import { cn, isVideoUrl } from '../../lib/utils'
+import { useAdmin } from '../../hooks/useAdmin'
+import { useAdminActions } from '../../hooks/useAdminActions'
 
 interface MediaGalleryProps {
   memories: Memory[]
@@ -16,6 +18,8 @@ interface GalleryItem {
   url: string
   type: 'image' | 'video'
   author: string
+  memoryId: string
+  isApproved: boolean
 }
 
 function VideoGridItem({ item, index, onClick }: { item: GalleryItem; index: number; onClick: () => void }) {
@@ -58,9 +62,67 @@ function VideoGridItem({ item, index, onClick }: { item: GalleryItem; index: num
   )
 }
 
+function AdminGalleryOverlay({ item }: { item: GalleryItem }) {
+  const { hideMemory } = useAdminActions()
+  const [confirmHide, setConfirmHide] = useState(false)
+
+  function handleHide(e: React.MouseEvent) {
+    e.stopPropagation()
+    if (confirmHide) {
+      hideMemory(item.memoryId)
+      setConfirmHide(false)
+    } else {
+      setConfirmHide(true)
+      setTimeout(() => setConfirmHide(false), 2000)
+    }
+  }
+
+  return (
+    <div className="absolute top-1.5 right-1.5 flex gap-1 z-10">
+      <button
+        onClick={handleHide}
+        className={cn(
+          'w-6 h-6 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors cursor-pointer',
+          confirmHide
+            ? 'bg-red-500/80 hover:bg-red-500'
+            : 'bg-navy/80 hover:bg-navy'
+        )}
+        title={confirmHide ? 'Tap again to hide' : 'Hide memory'}
+      >
+        <EyeOff className={cn('w-3 h-3', confirmHide ? 'text-white' : 'text-text-muted')} />
+      </button>
+    </div>
+  )
+}
+
+function AdminRotateOverlay({ item }: { item: GalleryItem }) {
+  const { rotateMemory } = useAdminActions()
+
+  function handleRotate(e: React.MouseEvent) {
+    e.stopPropagation()
+    // Rotate from 0 since we don't track per-image rotation in the gallery view
+    rotateMemory(item.memoryId, 0)
+  }
+
+  if (item.type === 'video') return null
+
+  return (
+    <div className="absolute top-1.5 left-1.5 z-10">
+      <button
+        onClick={handleRotate}
+        className="w-6 h-6 flex items-center justify-center bg-navy/80 backdrop-blur-sm rounded-full hover:bg-navy transition-colors cursor-pointer"
+        title="Rotate photo"
+      >
+        <RotateCw className="w-3 h-3 text-text-muted" />
+      </button>
+    </div>
+  )
+}
+
 export function MediaGallery({ memories }: MediaGalleryProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const { ref, isVisible } = useIntersection()
+  const { isAdmin } = useAdmin()
 
   const items: GalleryItem[] = useMemo(() => {
     const result: GalleryItem[] = []
@@ -68,8 +130,10 @@ export function MediaGallery({ memories }: MediaGalleryProps) {
       for (const url of memory.media_urls) {
         result.push({
           url,
-          type: url.match(/\.(mp4|mov|webm)$/i) ? 'video' : 'image',
+          type: isVideoUrl(url) ? 'video' : 'image',
           author: memory.author_name,
+          memoryId: memory.id,
+          isApproved: memory.is_approved,
         })
       }
     }
@@ -106,36 +170,51 @@ export function MediaGallery({ memories }: MediaGalleryProps) {
 
         {/* Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3">
-          {items.map((item, i) =>
-            item.type === 'video' ? (
-              <VideoGridItem
-                key={i}
-                item={item}
-                index={i}
-                onClick={() => setLightboxIndex(i)}
-              />
-            ) : (
-              <motion.button
-                key={i}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: Math.min(i * 0.03, 0.36), duration: 0.3 }}
-                onClick={() => setLightboxIndex(i)}
-                className="relative aspect-square rounded-lg overflow-hidden bg-navy-lighter group cursor-pointer ring-1 ring-white/5"
-              >
-                <img
-                  src={item.url}
-                  alt={`Shared by ${item.author}`}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  loading="lazy"
+          {items.map((item, i) => (
+            <div key={i} className={cn('relative', !item.isApproved && isAdmin && 'opacity-50')}>
+              {/* Hidden badge for admin */}
+              {isAdmin && !item.isApproved && (
+                <span className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 text-[9px] font-bold text-red-400 bg-red-400/15 border border-red-400/30 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                  Hidden
+                </span>
+              )}
+
+              {/* Admin overlays */}
+              {isAdmin && item.isApproved && (
+                <>
+                  <AdminGalleryOverlay item={item} />
+                  <AdminRotateOverlay item={item} />
+                </>
+              )}
+
+              {item.type === 'video' ? (
+                <VideoGridItem
+                  item={item}
+                  index={i}
+                  onClick={() => setLightboxIndex(i)}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
-                  <span className="text-white text-xs truncate">{item.author}</span>
-                </div>
-              </motion.button>
-            )
-          )}
+              ) : (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: Math.min(i * 0.03, 0.36), duration: 0.3 }}
+                  onClick={() => setLightboxIndex(i)}
+                  className="relative aspect-square rounded-lg overflow-hidden bg-navy-lighter group cursor-pointer ring-1 ring-white/5"
+                >
+                  <img
+                    src={item.url}
+                    alt={`Shared by ${item.author}`}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+                    <span className="text-white text-xs truncate">{item.author}</span>
+                  </div>
+                </motion.button>
+              )}
+            </div>
+          ))}
         </div>
 
         {/* Lightbox */}

@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { AdminProvider } from './contexts/AdminContext'
+import { useAdmin } from './hooks/useAdmin'
 import { Header } from './components/layout/Header'
 import { Footer } from './components/layout/Footer'
 import { Hero } from './components/hero/Hero'
@@ -7,15 +9,53 @@ import { SubmitMemory } from './components/memories/SubmitMemory'
 import { MediaGallery } from './components/gallery/MediaGallery'
 import { SpotifyEmbed } from './components/music/SpotifyEmbed'
 import { AboutMZ } from './components/about/AboutMZ'
+import { AdminLogin } from './components/admin/AdminLogin'
+import { AdminToolbar } from './components/admin/AdminToolbar'
 import { useMemories } from './hooks/useMemories'
 
-export function App() {
-  const { memories, loading, submitMemory } = useMemories()
+function AppContent() {
+  const { isAdmin, showHidden } = useAdmin()
+  const { memories, loading, submitMemory } = useMemories(isAdmin && showHidden)
   const [submitOpen, setSubmitOpen] = useState(false)
+  const [loginOpen, setLoginOpen] = useState(false)
+
+  // Keyboard shortcut: Ctrl+Shift+A opens admin login
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+        e.preventDefault()
+        if (!isAdmin) {
+          setLoginOpen(true)
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isAdmin])
+
+  // Compute counts for the admin toolbar
+  const { totalCount, hiddenCount } = useMemo(() => {
+    if (!isAdmin) return { totalCount: 0, hiddenCount: 0 }
+    const hidden = memories.filter((m) => !m.is_approved).length
+    return { totalCount: memories.length, hiddenCount: hidden }
+  }, [memories, isAdmin])
+
+  function handleAdminTrigger() {
+    if (!isAdmin) {
+      setLoginOpen(true)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-navy">
-      <Header onSubmitClick={() => setSubmitOpen(true)} />
+      <Header
+        onSubmitClick={() => setSubmitOpen(true)}
+        onAdminTrigger={handleAdminTrigger}
+      />
+
+      {isAdmin && (
+        <AdminToolbar totalCount={totalCount} hiddenCount={hiddenCount} />
+      )}
 
       <main>
         <Hero />
@@ -32,6 +72,12 @@ export function App() {
         isOpen={submitOpen}
         onClose={() => setSubmitOpen(false)}
         onSubmit={submitMemory}
+      />
+
+      {/* Admin login modal */}
+      <AdminLogin
+        isOpen={loginOpen}
+        onClose={() => setLoginOpen(false)}
       />
 
       {/* Mobile FAB for submit */}
@@ -55,5 +101,13 @@ export function App() {
         </svg>
       </button>
     </div>
+  )
+}
+
+export function App() {
+  return (
+    <AdminProvider>
+      <AppContent />
+    </AdminProvider>
   )
 }

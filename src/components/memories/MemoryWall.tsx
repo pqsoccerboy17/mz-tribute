@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import type { Memory } from '../../lib/types'
 import { MemoryCard } from './MemoryCard'
 import { MemoryDetail } from './MemoryDetail'
@@ -14,7 +14,7 @@ interface MemoryWallProps {
 
 export function MemoryWall({ memories, loading }: MemoryWallProps) {
   const [filter, setFilter] = useState('all')
-  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const { ref, isVisible } = useIntersection()
 
   const filteredMemories = useMemo(() => {
@@ -34,6 +34,11 @@ export function MemoryWall({ memories, loading }: MemoryWallProps) {
 
   const featured = filteredMemories.filter((m) => m.is_featured)
   const rest = filteredMemories.filter((m) => !m.is_featured)
+
+  const browseList = useMemo(() => [...featured, ...rest], [featured, rest])
+  const handleSelect = useCallback((index: number) => setSelectedIndex(index), [])
+  const handleNavigate = useCallback((index: number) => setSelectedIndex(index), [])
+  const handleClose = useCallback(() => setSelectedIndex(null), [])
 
   return (
     <div className="relative">
@@ -78,7 +83,8 @@ export function MemoryWall({ memories, loading }: MemoryWallProps) {
               <MemoryCard
                 key={memory.id}
                 memory={memory}
-                onSelect={setSelectedMemory}
+                onSelect={handleSelect}
+                browseIndex={i}
                 index={i}
               />
             ))}
@@ -91,7 +97,8 @@ export function MemoryWall({ memories, loading }: MemoryWallProps) {
             <MemoryCard
               key={memory.id}
               memory={memory}
-              onSelect={setSelectedMemory}
+              onSelect={handleSelect}
+              browseIndex={featured.length + i}
               index={i}
             />
           ))}
@@ -106,10 +113,12 @@ export function MemoryWall({ memories, loading }: MemoryWallProps) {
         )}
 
         {/* Detail modal */}
-        {selectedMemory && (
+        {selectedIndex !== null && (
           <MemoryDetail
-            memory={selectedMemory}
-            onClose={() => setSelectedMemory(null)}
+            memories={browseList}
+            currentIndex={selectedIndex}
+            onNavigate={handleNavigate}
+            onClose={handleClose}
           />
         )}
       </Container>

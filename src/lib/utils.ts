@@ -19,6 +19,11 @@ export function truncate(text: string, maxLength: number): string {
   return text.slice(0, maxLength).trimEnd() + '...'
 }
 
+/** Check if a URL points to a video file */
+export function isVideoUrl(url: string): boolean {
+  return /\.(mp4|mov|webm)$/i.test(url)
+}
+
 /** Format file size for display */
 export function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`

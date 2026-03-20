@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { cn } from '../../lib/utils'
 
 interface HeaderProps {
   onSubmitClick: () => void
+  onAdminTrigger: () => void
 }
 
-export function Header({ onSubmitClick }: HeaderProps) {
+export function Header({ onSubmitClick, onAdminTrigger }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false)
+  const tapTimesRef = useRef<number[]>([])
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50)
@@ -18,6 +20,21 @@ export function Header({ onSubmitClick }: HeaderProps) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  const handleCrestClick = useCallback(() => {
+    const now = Date.now()
+    tapTimesRef.current.push(now)
+
+    // Keep only taps within the last 1 second
+    tapTimesRef.current = tapTimesRef.current.filter((t) => now - t < 1000)
+
+    if (tapTimesRef.current.length >= 3) {
+      tapTimesRef.current = []
+      onAdminTrigger()
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [onAdminTrigger])
+
   return (
     <header
       className={cn(
@@ -28,9 +45,9 @@ export function Header({ onSubmitClick }: HeaderProps) {
       )}
     >
       <div className="mx-auto max-w-6xl px-4 flex items-center justify-between">
-        {/* MZ crest mark */}
+        {/* MZ crest mark - triple-tap opens admin login */}
         <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          onClick={handleCrestClick}
           className="group flex items-center gap-2 cursor-pointer"
         >
           <svg viewBox="0 0 28 34" className="w-6 h-7">

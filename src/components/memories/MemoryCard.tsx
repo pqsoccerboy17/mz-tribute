@@ -1,18 +1,17 @@
-import { useState } from 'react'
-import { Image as ImageIcon, Play, Film } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Image as ImageIcon, Play, Film, Star, EyeOff } from 'lucide-react'
 import { motion } from 'motion/react'
 import type { Memory } from '../../lib/types'
-import { cn, formatDate, truncate } from '../../lib/utils'
+import { cn, formatDate, truncate, isVideoUrl } from '../../lib/utils'
 import { useVideoThumbnail } from '../../hooks/useVideoThumbnail'
+import { useAdmin } from '../../hooks/useAdmin'
+import { useAdminActions } from '../../hooks/useAdminActions'
 
 interface MemoryCardProps {
   memory: Memory
-  onSelect: (memory: Memory) => void
+  onSelect: (index: number) => void
+  browseIndex: number
   index?: number
-}
-
-function isVideoUrl(url: string) {
-  return /\.(mp4|mov|webm)$/i.test(url)
 }
 
 function VideoThumbnail({ url }: { url: string }) {
@@ -39,8 +38,12 @@ function VideoThumbnail({ url }: { url: string }) {
   )
 }
 
-export function MemoryCard({ memory, onSelect, index = 0 }: MemoryCardProps) {
+export function MemoryCard({ memory, onSelect, browseIndex, index = 0 }: MemoryCardProps) {
   const [expanded, setExpanded] = useState(false)
+  const { isAdmin } = useAdmin()
+  const { hideMemory, toggleFeatured } = useAdminActions()
+  const [hideConfirm, setHideConfirm] = useState(false)
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const hasMedia = memory.media_urls.length > 0
   const hasVideo = hasMedia && memory.media_urls.some(isVideoUrl)
@@ -48,6 +51,24 @@ export function MemoryCard({ memory, onSelect, index = 0 }: MemoryCardProps) {
   const displayText = expanded
     ? memory.content || ''
     : truncate(memory.content || '', 200)
+  const isHidden = !memory.is_approved
+
+  function handleHideClick(e: React.MouseEvent) {
+    e.stopPropagation()
+    if (hideConfirm) {
+      hideMemory(memory.id)
+      setHideConfirm(false)
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+    } else {
+      setHideConfirm(true)
+      hideTimerRef.current = setTimeout(() => setHideConfirm(false), 2000)
+    }
+  }
+
+  function handleFeatureClick(e: React.MouseEvent) {
+    e.stopPropagation()
+    toggleFeatured(memory.id, memory.is_featured)
+  }
 
   return (
     <motion.div
@@ -61,10 +82,57 @@ export function MemoryCard({ memory, onSelect, index = 0 }: MemoryCardProps) {
         'transition-all duration-300',
         'hover:-translate-y-0.5 hover:shadow-lg hover:shadow-bvb-yellow/[0.03]',
         memory.is_featured && 'border-l-[3px] border-l-bvb-yellow bg-gradient-to-r from-bvb-yellow/[0.03] to-transparent',
-        hasVideo && 'border-t-[2px] border-t-bvb-yellow/10'
+        hasVideo && 'border-t-[2px] border-t-bvb-yellow/10',
+        isHidden && 'opacity-50'
       )}
-      onClick={() => onSelect(memory)}
+      onClick={() => onSelect(browseIndex)}
     >
+      {/* Admin overlay buttons */}
+      {isAdmin && (
+        <div className="absolute top-2 right-2 flex gap-1 z-10">
+          <button
+            onClick={handleFeatureClick}
+            className="w-7 h-7 flex items-center justify-center bg-navy/80 backdrop-blur-sm rounded-full hover:bg-navy transition-colors cursor-pointer"
+            title={memory.is_featured ? 'Remove featured' : 'Mark featured'}
+          >
+            <Star
+              className={cn(
+                'w-3.5 h-3.5',
+                memory.is_featured
+                  ? 'text-bvb-yellow fill-bvb-yellow'
+                  : 'text-text-muted'
+              )}
+            />
+          </button>
+          {!isHidden && (
+            <button
+              onClick={handleHideClick}
+              className={cn(
+                'w-7 h-7 flex items-center justify-center bg-navy/80 backdrop-blur-sm rounded-full transition-colors cursor-pointer',
+                hideConfirm
+                  ? 'bg-red-500/80 hover:bg-red-500'
+                  : 'hover:bg-navy'
+              )}
+              title={hideConfirm ? 'Tap again to hide' : 'Hide memory'}
+            >
+              <EyeOff
+                className={cn(
+                  'w-3.5 h-3.5',
+                  hideConfirm ? 'text-white' : 'text-text-muted'
+                )}
+              />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Hidden badge */}
+      {isAdmin && isHidden && (
+        <span className="absolute top-2 left-2 z-10 text-[10px] font-bold text-red-400 bg-red-400/15 border border-red-400/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
+          Hidden
+        </span>
+      )}
+
       {/* Author + era tag */}
       <div className="flex items-start justify-between mb-3">
         <h3 className="font-medium text-cream text-sm">
