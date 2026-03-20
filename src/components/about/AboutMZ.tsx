@@ -99,11 +99,11 @@ export function AboutMZ() {
                     stat.number
                   )}
                 </div>
-                <div className="text-text-muted text-[11px] uppercase tracking-[0.15em]">
+                <div className="text-text-muted text-xs uppercase tracking-[0.15em]">
                   {stat.label}
                 </div>
                 {stat.sublabel && (
-                  <div className="text-bvb-yellow/40 text-[11px] italic mt-0.5">
+                  <div className="text-bvb-yellow/40 text-xs italic mt-0.5">
                     {stat.sublabel}
                   </div>
                 )}

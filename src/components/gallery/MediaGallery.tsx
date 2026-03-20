@@ -196,7 +196,7 @@ export function MediaGallery({ memories }: MediaGalleryProps) {
               {/* Hidden badge + unhide button for admin */}
               {isAdmin && !item.isApproved && (
                 <>
-                  <span className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 text-[9px] font-bold text-red-400 bg-red-400/15 border border-red-400/30 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                  <span className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 text-xs font-bold text-red-400 bg-red-400/15 border border-red-400/30 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
                     Hidden
                   </span>
                   <AdminUnhideOverlay item={item} />

@@ -136,7 +136,7 @@ export function MemoryCard({ memory, onSelect, browseIndex, index = 0 }: MemoryC
 
       {/* Hidden badge */}
       {isAdmin && isHidden && (
-        <span className="absolute top-2 left-2 z-10 text-[10px] font-bold text-red-400 bg-red-400/15 border border-red-400/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
+        <span className="absolute top-2 left-2 z-10 text-xs font-bold text-red-400 bg-red-400/15 border border-red-400/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
           Hidden
         </span>
       )}
@@ -147,7 +147,7 @@ export function MemoryCard({ memory, onSelect, browseIndex, index = 0 }: MemoryC
           {memory.author_name}
         </h3>
         {memory.era && (
-          <span className="text-[10px] text-bvb-yellow/70 bg-bvb-yellow/[0.08] border border-bvb-yellow/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
+          <span className="text-xs text-bvb-yellow/70 bg-bvb-yellow/[0.08] border border-bvb-yellow/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
             {memory.era}
           </span>
         )}
@@ -213,7 +213,7 @@ export function MemoryCard({ memory, onSelect, browseIndex, index = 0 }: MemoryC
           </span>
         )}
         {memory.source === 'whatsapp' && (
-          <span className="text-pitch-green-light text-[10px] uppercase tracking-wider">WhatsApp</span>
+          <span className="text-pitch-green-light text-xs uppercase tracking-wider">WhatsApp</span>
         )}
       </div>
     </motion.div>

@@ -80,7 +80,7 @@ function HorizontalTimeline({ isVisible }: { isVisible: boolean }) {
           />
 
           {/* Description -- short labels to prevent overlap */}
-          <span className="text-[11px] text-text-muted uppercase tracking-[0.12em] mt-2 whitespace-nowrap">
+          <span className="text-xs text-text-muted uppercase tracking-[0.12em] mt-2 whitespace-nowrap">
             {m.shortLabel}
           </span>
         </motion.div>
