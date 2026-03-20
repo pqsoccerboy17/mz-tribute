@@ -1,0 +1,89 @@
+import type { Memory } from './types'
+
+/** Mock memories for development before Supabase is connected */
+export const MOCK_MEMORIES: Memory[] = [
+  {
+    id: '1',
+    author_name: 'The SSU Soccer Family',
+    content:
+      "MZ wasn't just a coach -- he was the heartbeat of Sonoma State soccer for over 40 years. He built something that went far beyond wins and losses. He built a brotherhood. Every player who came through that program left with lifelong friends, a deeper appreciation for music, and stories they'll tell their grandkids. You'll Never Walk Alone, Coach.",
+    media_urls: [],
+    source: 'web',
+    whatsapp_timestamp: null,
+    era: null,
+    is_featured: true,
+    is_approved: true,
+    created_at: '2026-03-15T20:00:00Z',
+    updated_at: '2026-03-15T20:00:00Z',
+  },
+  {
+    id: '2',
+    author_name: 'A Former Player',
+    content:
+      "I remember the road trips more than any game. MZ in the driver's seat, Van Morrison blasting, the whole van singing along. He'd pull over at some random brewery and say \"gentlemen, this is culture.\" Those moments shaped who I am more than any practice ever did.",
+    media_urls: [],
+    source: 'whatsapp',
+    whatsapp_timestamp: '2026-03-16T08:30:00Z',
+    era: 'player',
+    is_featured: true,
+    is_approved: true,
+    created_at: '2026-03-16T08:30:00Z',
+    updated_at: '2026-03-16T08:30:00Z',
+  },
+  {
+    id: '3',
+    author_name: 'An Alumni Brother',
+    content:
+      'The man could talk about three things for hours: soccer tactics, music, and his brothers. The European trips with BZ, CZ, and AZ were sacred. And that last trip to Dortmund -- singing YNWA in the stands -- I can not think of a more perfect final chapter.',
+    media_urls: [],
+    source: 'whatsapp',
+    whatsapp_timestamp: '2026-03-16T10:15:00Z',
+    era: 'post-grad',
+    is_featured: false,
+    is_approved: true,
+    created_at: '2026-03-16T10:15:00Z',
+    updated_at: '2026-03-16T10:15:00Z',
+  },
+  {
+    id: '4',
+    author_name: 'Class of 2005',
+    content:
+      "Pliny the Elder wasn't just a beer -- it was a religion. MZ would show up to the alumni tailgate with a cooler full and that grin on his face. \"Only the best for my guys.\" Everything he did was about bringing people together.",
+    media_urls: [],
+    source: 'whatsapp',
+    whatsapp_timestamp: '2026-03-16T14:00:00Z',
+    era: 'post-grad',
+    is_featured: false,
+    is_approved: true,
+    created_at: '2026-03-16T14:00:00Z',
+    updated_at: '2026-03-16T14:00:00Z',
+  },
+  {
+    id: '5',
+    author_name: 'A Coaching Colleague',
+    content:
+      "In 40+ years at SSU, Marcus built one of the most respected programs in Division II. But ask any of his players and they won't talk about championships first -- they'll talk about the man, the music, and the family he created. That's a legacy that outlasts any trophy.",
+    media_urls: [],
+    source: 'web',
+    whatsapp_timestamp: null,
+    era: 'colleague',
+    is_featured: false,
+    is_approved: true,
+    created_at: '2026-03-17T09:00:00Z',
+    updated_at: '2026-03-17T09:00:00Z',
+  },
+  {
+    id: '6',
+    author_name: 'Class of 1998',
+    content:
+      "My freshman year, MZ pulled me aside after a tough loss. Didn't say a word about the game. He put on Astral Weeks by Van Morrison and said \"listen to this whole album tonight, then we'll talk tomorrow.\" That was coaching. That was MZ.",
+    media_urls: [],
+    source: 'whatsapp',
+    whatsapp_timestamp: '2026-03-16T18:45:00Z',
+    era: 'player',
+    is_featured: true,
+    is_approved: true,
+    created_at: '2026-03-16T18:45:00Z',
+    updated_at: '2026-03-16T18:45:00Z',
+  },
+]

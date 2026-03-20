@@ -1,0 +1,172 @@
+@import 'tailwindcss';
+
+/* ============================================
+   MZ Tribute Design System
+   "Stadium Hymnal" - concert poster meets
+   soccer culture meets brotherhood
+   ============================================ */
+
+@theme {
+  /* SSU Blue - the color they all bleed */
+  --color-ssu-blue: #003B6F;
+  --color-ssu-blue-light: #0A5299;
+
+  /* BVB Yellow - his beloved Dortmund */
+  --color-bvb-yellow: #FDE100;
+  --color-bvb-yellow-dim: #D4BE00;
+
+  /* NorCal warmth */
+  --color-terracotta: #B5573A;
+  --color-terracotta-light: #D4765A;
+
+  /* Pitch green for soccer touches */
+  --color-pitch-green: #2D5A3D;
+
+  /* Dark mode surfaces */
+  --color-navy: #0A1628;
+  --color-navy-light: #121E33;
+  --color-navy-lighter: #1A2940;
+
+  /* Light surfaces */
+  --color-cream: #F5F0E8;
+  --color-cream-dark: #E8E0D4;
+
+  /* Text */
+  --color-text-primary: #F5F0E8;
+  --color-text-secondary: #A0A8B8;
+  --color-text-muted: #6B7280;
+
+  /* Typography */
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-navy);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+}
+
+/* ============================================
+   Film Grain Texture Overlay
+   ============================================ */
+
+.film-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ============================================
+   Pitch Line Pattern (faint soccer field lines)
+   ============================================ */
+
+.pitch-lines {
+  background-image:
+    linear-gradient(to right, rgba(45, 90, 61, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(45, 90, 61, 0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ============================================
+   Scrollbar Styling
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-navy);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-navy-lighter);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ssu-blue);
+}
+
+/* ============================================
+   Masonry Grid
+   ============================================ */
+
+.masonry-grid {
+  columns: 1;
+  column-gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .masonry-grid {
+    columns: 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .masonry-grid {
+    columns: 3;
+  }
+}
+
+.masonry-grid > * {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(253, 225, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px rgba(253, 225, 0, 0.15);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Scroll indicator bounce */
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
