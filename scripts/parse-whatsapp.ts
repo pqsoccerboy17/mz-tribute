@@ -12,7 +12,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { readFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs'
 import { execSync } from 'child_process'
-import { join, dirname, extname } from 'path'
+import { join, dirname, extname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 import { readdir } from 'fs/promises'
 
@@ -28,7 +28,11 @@ function findZip(): string {
   const files = readdirSync(PROJECT_ROOT)
   const zips = files
     .filter((f) => f.startsWith('WhatsApp') && f.endsWith('.zip'))
-    .map((f) => ({ name: f, mtime: statSync(join(PROJECT_ROOT, f)).mtimeMs }))
+    .map((f) => {
+      const full = resolve(PROJECT_ROOT, f)
+      if (!full.startsWith(PROJECT_ROOT)) throw new Error(`Path traversal blocked: ${f}`)
+      return { name: f, mtime: statSync(full).mtimeMs }
+    })
     .sort((a, b) => b.mtime - a.mtime)
 
   if (zips.length === 0) {
@@ -264,7 +268,11 @@ async function uploadMedia(
   supabase: ReturnType<typeof createClient>,
   filename: string
 ): Promise<string | null> {
-  const filePath = join(EXTRACT_DIR, filename)
+  const filePath = resolve(EXTRACT_DIR, filename)
+  if (!filePath.startsWith(EXTRACT_DIR)) {
+    console.warn(`  Path traversal blocked: ${filename}`)
+    return null
+  }
   if (!existsSync(filePath)) {
     console.warn(`  Media file not found: ${filename}`)
     return null
