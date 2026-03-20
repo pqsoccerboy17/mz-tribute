@@ -17,7 +17,10 @@ export function Header({ onSubmitClick, onAdminTrigger }: HeaderProps) {
   }, [])
 
   const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+    const el = document.getElementById(id)
+    if (!el) return
+    const y = el.getBoundingClientRect().top + window.scrollY - 80
+    window.scrollTo({ top: y, behavior: 'smooth' })
   }
 
   const handleCrestClick = useCallback(() => {
