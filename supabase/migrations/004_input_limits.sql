@@ -7,7 +7,7 @@ ALTER TABLE memories
 
 ALTER TABLE memories
   ADD CONSTRAINT chk_content_length
-    CHECK (content IS NULL OR char_length(content) <= 5000);
+    CHECK (content IS NULL OR char_length(content) <= 20000);
 
 ALTER TABLE memories
   ADD CONSTRAINT chk_media_urls_count
