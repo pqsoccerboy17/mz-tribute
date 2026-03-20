@@ -1,0 +1,5 @@
+*.zip
+.whatsapp-export/
+*.png
+node_modules/
+.git/

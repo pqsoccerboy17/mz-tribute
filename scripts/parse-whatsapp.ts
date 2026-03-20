@@ -10,20 +10,31 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import { readFileSync, existsSync, mkdirSync } from 'fs'
+import { readFileSync, existsSync, mkdirSync, readdirSync } from 'fs'
 import { execSync } from 'child_process'
-import { join, extname } from 'path'
+import { join, dirname, extname } from 'path'
+import { fileURLToPath } from 'url'
 import { readdir } from 'fs/promises'
 
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
 
-const PROJECT_ROOT = join(import.meta.dirname, '..')
-const ZIP_PATH = join(
-  PROJECT_ROOT,
-  'WhatsApp Chat - SSU Men\'s Soccer Alumni (1).zip'
-)
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const PROJECT_ROOT = join(__dirname, '..')
+
+// Find the zip by pattern (filename has Unicode chars that vary by OS)
+function findZip(): string {
+  const files = readdirSync(PROJECT_ROOT)
+  const zip = files.find((f) => f.startsWith('WhatsApp') && f.endsWith('.zip'))
+  if (!zip) {
+    console.error('No WhatsApp .zip export found in project root')
+    process.exit(1)
+  }
+  return join(PROJECT_ROOT, zip)
+}
+
+const ZIP_PATH = findZip()
 const EXTRACT_DIR = join(PROJECT_ROOT, '.whatsapp-export')
 const STORAGE_BUCKET = 'tribute-media'
 

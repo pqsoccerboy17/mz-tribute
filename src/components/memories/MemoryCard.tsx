@@ -23,22 +23,23 @@ export function MemoryCard({ memory, onSelect }: MemoryCardProps) {
     <div
       ref={ref}
       className={cn(
-        'group bg-navy-light border border-white/5 rounded-xl p-5 cursor-pointer',
-        'transition-all duration-300 hover:border-ssu-blue/30 hover:shadow-lg hover:shadow-ssu-blue/5',
-        'hover:-translate-y-0.5',
-        memory.is_featured && 'border-l-2 border-l-bvb-yellow',
+        'group relative bg-navy-light rounded-xl p-5 cursor-pointer memory-card-accent',
+        'border border-white/[0.04] hover:border-bvb-yellow/20',
+        'transition-all duration-300',
+        'hover:-translate-y-0.5 hover:shadow-lg hover:shadow-bvb-yellow/[0.03]',
+        memory.is_featured && 'border-l-[3px] border-l-bvb-yellow bg-gradient-to-r from-bvb-yellow/[0.03] to-transparent',
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
       )}
       style={{ transition: 'opacity 0.5s ease, transform 0.5s ease, border-color 0.3s, box-shadow 0.3s' }}
       onClick={() => onSelect(memory)}
     >
-      {/* Author + date */}
+      {/* Author + era tag */}
       <div className="flex items-start justify-between mb-3">
         <h3 className="font-medium text-cream text-sm">
           {memory.author_name}
         </h3>
         {memory.era && (
-          <span className="text-xs text-text-muted bg-navy-lighter px-2 py-0.5 rounded-full">
+          <span className="text-[10px] text-bvb-yellow/70 bg-bvb-yellow/[0.08] border border-bvb-yellow/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
             {memory.era}
           </span>
         )}
@@ -56,7 +57,7 @@ export function MemoryCard({ memory, onSelect }: MemoryCardProps) {
                 e.stopPropagation()
                 setExpanded(!expanded)
               }}
-              className="text-ssu-blue-light text-xs mt-1 hover:underline cursor-pointer"
+              className="text-bvb-yellow/70 text-xs mt-1 hover:text-bvb-yellow hover:underline cursor-pointer transition-colors"
             >
               {expanded ? 'Show less' : 'Read more'}
             </button>
@@ -64,17 +65,17 @@ export function MemoryCard({ memory, onSelect }: MemoryCardProps) {
         </div>
       )}
 
-      {/* Media indicator */}
+      {/* Media thumbnails */}
       {hasMedia && (
         <div className="flex gap-2 mb-3">
           {memory.media_urls.slice(0, 3).map((url, i) => (
             <div
               key={i}
-              className="relative w-16 h-16 rounded-lg bg-navy-lighter overflow-hidden"
+              className="relative w-16 h-16 rounded-lg bg-navy-lighter overflow-hidden ring-1 ring-white/5"
             >
               {url.match(/\.(mp4|mov|webm)$/i) ? (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Play className="w-5 h-5 text-text-muted" />
+                <div className="w-full h-full flex items-center justify-center bg-navy-lighter">
+                  <Play className="w-5 h-5 text-bvb-yellow/50" />
                 </div>
               ) : (
                 <img
@@ -87,7 +88,7 @@ export function MemoryCard({ memory, onSelect }: MemoryCardProps) {
             </div>
           ))}
           {memory.media_urls.length > 3 && (
-            <div className="w-16 h-16 rounded-lg bg-navy-lighter flex items-center justify-center">
+            <div className="w-16 h-16 rounded-lg bg-navy-lighter flex items-center justify-center ring-1 ring-white/5">
               <span className="text-text-muted text-xs">
                 +{memory.media_urls.length - 3}
               </span>
@@ -96,8 +97,8 @@ export function MemoryCard({ memory, onSelect }: MemoryCardProps) {
         </div>
       )}
 
-      {/* Footer */}
-      <div className="flex items-center gap-3 text-text-muted text-xs">
+      {/* Footer -- matchday programme style */}
+      <div className="flex items-center gap-3 text-text-muted text-xs pt-2 border-t border-white/[0.04]">
         <time>{formatDate(memory.whatsapp_timestamp || memory.created_at)}</time>
         {hasMedia && (
           <span className="flex items-center gap-1">
@@ -106,7 +107,7 @@ export function MemoryCard({ memory, onSelect }: MemoryCardProps) {
           </span>
         )}
         {memory.source === 'whatsapp' && (
-          <span className="text-pitch-green">via WhatsApp</span>
+          <span className="text-pitch-green-light text-[10px] uppercase tracking-wider">WhatsApp</span>
         )}
       </div>
     </div>

@@ -2,8 +2,10 @@
 
 /* ============================================
    MZ Tribute Design System
-   "Stadium Hymnal" - concert poster meets
-   soccer culture meets brotherhood
+   "The Yellow Wall" - Signal Iduna Park meets
+   SSU brotherhood. Stadium atmosphere under
+   floodlights. The energy of 200 brothers
+   singing together.
    ============================================ */
 
 @theme {
@@ -21,6 +23,7 @@
 
   /* Pitch green for soccer touches */
   --color-pitch-green: #2D5A3D;
+  --color-pitch-green-light: #3A7A52;
 
   /* Dark mode surfaces */
   --color-navy: #0A1628;
@@ -35,6 +38,9 @@
   --color-text-primary: #F5F0E8;
   --color-text-secondary: #A0A8B8;
   --color-text-muted: #6B7280;
+
+  /* Stadium amber -- floodlight glow */
+  --color-amber-glow: #F5A623;
 
   /* Typography */
   --font-display: 'Instrument Serif', Georgia, serif;
@@ -66,20 +72,57 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  opacity: 0.04;
+  opacity: 0.05;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
 }
 
 /* ============================================
-   Pitch Line Pattern (faint soccer field lines)
+   Pitch Line Pattern -- real soccer field
    ============================================ */
 
 .pitch-lines {
   background-image:
-    linear-gradient(to right, rgba(45, 90, 61, 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(45, 90, 61, 0.06) 1px, transparent 1px);
+    linear-gradient(to right, rgba(45, 90, 61, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(45, 90, 61, 0.08) 1px, transparent 1px);
   background-size: 60px 60px;
+}
+
+/* Center circle for hero -- like looking down at the pitch */
+.pitch-center-circle {
+  background-image:
+    radial-gradient(circle at 50% 60%, transparent 140px, rgba(45, 90, 61, 0.1) 141px, rgba(45, 90, 61, 0.1) 142px, transparent 143px),
+    radial-gradient(circle at 50% 60%, transparent 280px, rgba(45, 90, 61, 0.06) 281px, rgba(45, 90, 61, 0.06) 282px, transparent 283px);
+}
+
+/* Halfway line */
+.pitch-halfway {
+  background-image:
+    linear-gradient(to right, transparent 0%, transparent calc(50% - 0.5px), rgba(45, 90, 61, 0.12) calc(50% - 0.5px), rgba(45, 90, 61, 0.12) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+}
+
+/* Stadium floodlight gradient -- warm amber from above */
+.floodlight-glow {
+  background-image:
+    radial-gradient(ellipse at 30% -20%, rgba(245, 166, 35, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% -20%, rgba(245, 166, 35, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% -10%, rgba(253, 225, 0, 0.03) 0%, transparent 60%);
+}
+
+/* ============================================
+   Stadium Terrace Pattern
+   diagonal hatch like seating rows
+   ============================================ */
+
+.terrace-pattern {
+  background-image:
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 10px,
+      rgba(253, 225, 0, 0.015) 10px,
+      rgba(253, 225, 0, 0.015) 11px
+    );
 }
 
 /* ============================================
@@ -150,10 +193,10 @@ body {
 
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(253, 225, 0, 0.3);
+    box-shadow: 0 0 0 0 rgba(253, 225, 0, 0.4);
   }
   50% {
-    box-shadow: 0 0 20px 4px rgba(253, 225, 0, 0.15);
+    box-shadow: 0 0 30px 8px rgba(253, 225, 0, 0.15);
   }
 }
 
@@ -161,7 +204,6 @@ body {
   animation: pulse-glow 3s ease-in-out infinite;
 }
 
-/* Scroll indicator bounce */
 @keyframes bounce-subtle {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(8px); }
@@ -169,4 +211,89 @@ body {
 
 .animate-bounce-subtle {
   animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+/* Stadium lights flicker */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.8; }
+  94% { opacity: 1; }
+  96% { opacity: 0.9; }
+  97% { opacity: 1; }
+}
+
+.animate-flicker {
+  animation: flicker 8s ease-in-out infinite;
+}
+
+/* Slow horizontal drift for atmosphere */
+@keyframes drift {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(10px); }
+}
+
+.animate-drift {
+  animation: drift 20s ease-in-out infinite;
+}
+
+/* ============================================
+   Section Divider -- pitch line style
+   ============================================ */
+
+.section-divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(45, 90, 61, 0.3) 20%,
+    rgba(45, 90, 61, 0.3) 80%,
+    transparent 100%
+  );
+  margin: 0 auto;
+  max-width: 80%;
+}
+
+/* ============================================
+   Matchday Programme stat card
+   ============================================ */
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(to right, var(--color-bvb-yellow), var(--color-ssu-blue));
+}
+
+/* ============================================
+   Memory card pitch-line accent
+   ============================================ */
+
+.memory-card-accent {
+  position: relative;
+}
+
+.memory-card-accent::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 0;
+  bottom: 12px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--color-bvb-yellow), var(--color-ssu-blue));
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.memory-card-accent:hover::before {
+  opacity: 1;
 }

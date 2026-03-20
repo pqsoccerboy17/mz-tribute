@@ -32,40 +32,61 @@ export function MemoryWall({ memories, loading }: MemoryWallProps) {
     return memories
   }, [memories, filter])
 
-  // Separate featured memories for the top row
   const featured = filteredMemories.filter((m) => m.is_featured)
   const rest = filteredMemories.filter((m) => !m.is_featured)
 
   return (
-    <Container id="memories" className="py-16 sm:py-24">
-      {/* Section header */}
-      <div
-        ref={ref}
-        className={cn(
-          'mb-8 transition-all duration-700',
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-        )}
-      >
-        <h2 className="font-display text-3xl sm:text-4xl text-cream mb-2">
-          Memories
-        </h2>
-        <p className="text-text-secondary mb-6">
-          {memories.length} tributes from the SSU Soccer family
-        </p>
-        <MemoryFilter activeFilter={filter} onFilterChange={setFilter} />
-      </div>
+    <div className="relative">
+      {/* Section background -- subtle floodlight from above */}
+      <div className="absolute inset-0 floodlight-glow pointer-events-none" />
 
-      {/* Loading state */}
-      {loading && (
-        <div className="flex items-center justify-center py-16">
-          <div className="w-8 h-8 border-2 border-ssu-blue border-t-transparent rounded-full animate-spin" />
+      <Container id="memories" className="relative py-16 sm:py-24">
+        {/* Pitch-line divider at top */}
+        <div className="section-divider mb-12" />
+
+        {/* Section header */}
+        <div
+          ref={ref}
+          className={cn(
+            'mb-8 transition-all duration-700',
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+          )}
+        >
+          <div className="flex items-center gap-4 mb-2">
+            <h2 className="font-display text-3xl sm:text-4xl text-cream">
+              Memories
+            </h2>
+            <div className="h-px flex-1 bg-gradient-to-r from-pitch-green/20 to-transparent" />
+          </div>
+          <p className="text-text-secondary mb-6">
+            {memories.length} tributes from the SSU Soccer family
+          </p>
+          <MemoryFilter activeFilter={filter} onFilterChange={setFilter} />
         </div>
-      )}
 
-      {/* Featured memories row */}
-      {featured.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          {featured.map((memory) => (
+        {/* Loading */}
+        {loading && (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-8 h-8 border-2 border-bvb-yellow border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+
+        {/* Featured */}
+        {featured.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            {featured.map((memory) => (
+              <MemoryCard
+                key={memory.id}
+                memory={memory}
+                onSelect={setSelectedMemory}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Masonry */}
+        <div className="masonry-grid">
+          {rest.map((memory) => (
             <MemoryCard
               key={memory.id}
               memory={memory}
@@ -73,34 +94,23 @@ export function MemoryWall({ memories, loading }: MemoryWallProps) {
             />
           ))}
         </div>
-      )}
 
-      {/* Masonry grid for the rest */}
-      <div className="masonry-grid">
-        {rest.map((memory) => (
-          <MemoryCard
-            key={memory.id}
-            memory={memory}
-            onSelect={setSelectedMemory}
+        {/* Empty */}
+        {!loading && filteredMemories.length === 0 && (
+          <div className="text-center py-16 text-text-muted">
+            <p className="text-lg">No memories found for this filter.</p>
+            <p className="text-sm mt-2">Try "All" to see everything.</p>
+          </div>
+        )}
+
+        {/* Detail modal */}
+        {selectedMemory && (
+          <MemoryDetail
+            memory={selectedMemory}
+            onClose={() => setSelectedMemory(null)}
           />
-        ))}
-      </div>
-
-      {/* Empty state */}
-      {!loading && filteredMemories.length === 0 && (
-        <div className="text-center py-16 text-text-muted">
-          <p className="text-lg">No memories found for this filter.</p>
-          <p className="text-sm mt-2">Try "All" to see everything.</p>
-        </div>
-      )}
-
-      {/* Detail modal */}
-      {selectedMemory && (
-        <MemoryDetail
-          memory={selectedMemory}
-          onClose={() => setSelectedMemory(null)}
-        />
-      )}
-    </Container>
+        )}
+      </Container>
+    </div>
   )
 }
