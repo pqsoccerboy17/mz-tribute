@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Image as ImageIcon, Play, Film, Star, EyeOff } from 'lucide-react'
+import { Image as ImageIcon, Play, Film, Star, EyeOff, Loader2, Check } from 'lucide-react'
 import { motion } from 'motion/react'
 import type { Memory } from '../../lib/types'
 import { cn, formatDate, truncate, isVideoUrl } from '../../lib/utils'
@@ -43,6 +43,9 @@ export function MemoryCard({ memory, onSelect, browseIndex, index = 0 }: MemoryC
   const { isAdmin } = useAdmin()
   const { hideMemory, showMemory, toggleFeatured } = useAdminActions()
   const [hideConfirm, setHideConfirm] = useState(false)
+  const [hideLoading, setHideLoading] = useState(false)
+  const [hideSuccess, setHideSuccess] = useState(false)
+  const [unhideLoading, setUnhideLoading] = useState(false)
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const hasMedia = memory.media_urls.length > 0
@@ -53,16 +56,31 @@ export function MemoryCard({ memory, onSelect, browseIndex, index = 0 }: MemoryC
     : truncate(memory.content || '', 200)
   const isHidden = !memory.is_approved
 
-  function handleHideClick(e: React.MouseEvent) {
+  async function handleHideClick(e: React.MouseEvent) {
     e.stopPropagation()
+    if (hideLoading || hideSuccess) return
     if (hideConfirm) {
-      hideMemory(memory.id)
       setHideConfirm(false)
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+      setHideLoading(true)
+      const ok = await hideMemory(memory.id)
+      setHideLoading(false)
+      if (ok) {
+        setHideSuccess(true)
+        setTimeout(() => setHideSuccess(false), 800)
+      }
     } else {
       setHideConfirm(true)
-      hideTimerRef.current = setTimeout(() => setHideConfirm(false), 2000)
+      hideTimerRef.current = setTimeout(() => setHideConfirm(false), 3000)
     }
+  }
+
+  async function handleUnhideClick(e: React.MouseEvent) {
+    e.stopPropagation()
+    if (unhideLoading) return
+    setUnhideLoading(true)
+    await showMemory(memory.id)
+    setUnhideLoading(false)
   }
 
   function handleFeatureClick(e: React.MouseEvent) {
@@ -87,17 +105,31 @@ export function MemoryCard({ memory, onSelect, browseIndex, index = 0 }: MemoryC
       )}
       onClick={() => onSelect(browseIndex)}
     >
+      {/* Loading/success overlay */}
+      {isAdmin && (hideLoading || hideSuccess) && (
+        <div className={cn(
+          'absolute inset-0 z-20 flex items-center justify-center rounded-xl transition-opacity',
+          hideLoading ? 'bg-navy/70' : 'bg-pitch-green/30'
+        )}>
+          {hideLoading ? (
+            <Loader2 className="w-6 h-6 text-cream animate-spin" />
+          ) : (
+            <Check className="w-6 h-6 text-pitch-green" />
+          )}
+        </div>
+      )}
+
       {/* Admin overlay buttons */}
       {isAdmin && (
         <div className="absolute top-2 right-2 flex gap-1 z-10">
           <button
             onClick={handleFeatureClick}
-            className="w-7 h-7 flex items-center justify-center bg-navy/80 backdrop-blur-sm rounded-full hover:bg-navy transition-colors cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center bg-navy/80 backdrop-blur-sm rounded-full hover:bg-navy transition-colors cursor-pointer"
             title={memory.is_featured ? 'Remove featured' : 'Mark featured'}
           >
             <Star
               className={cn(
-                'w-3.5 h-3.5',
+                'w-4 h-4',
                 memory.is_featured
                   ? 'text-bvb-yellow fill-bvb-yellow'
                   : 'text-text-muted'
@@ -107,8 +139,9 @@ export function MemoryCard({ memory, onSelect, browseIndex, index = 0 }: MemoryC
           {!isHidden ? (
             <button
               onClick={handleHideClick}
+              disabled={hideLoading || hideSuccess}
               className={cn(
-                'w-7 h-7 flex items-center justify-center bg-navy/80 backdrop-blur-sm rounded-full transition-colors cursor-pointer',
+                'w-8 h-8 flex items-center justify-center bg-navy/80 backdrop-blur-sm rounded-full transition-colors cursor-pointer',
                 hideConfirm
                   ? 'bg-red-500/80 hover:bg-red-500'
                   : 'hover:bg-navy'
@@ -117,18 +150,23 @@ export function MemoryCard({ memory, onSelect, browseIndex, index = 0 }: MemoryC
             >
               <EyeOff
                 className={cn(
-                  'w-3.5 h-3.5',
+                  'w-4 h-4',
                   hideConfirm ? 'text-white' : 'text-text-muted'
                 )}
               />
             </button>
           ) : (
             <button
-              onClick={(e) => { e.stopPropagation(); showMemory(memory.id) }}
-              className="w-7 h-7 flex items-center justify-center bg-pitch-green/80 backdrop-blur-sm rounded-full hover:bg-pitch-green transition-colors cursor-pointer"
+              onClick={handleUnhideClick}
+              disabled={unhideLoading}
+              className="w-8 h-8 flex items-center justify-center bg-pitch-green/80 backdrop-blur-sm rounded-full hover:bg-pitch-green transition-colors cursor-pointer"
               title="Unhide memory"
             >
-              <EyeOff className="w-3.5 h-3.5 text-white" />
+              {unhideLoading ? (
+                <Loader2 className="w-4 h-4 text-white animate-spin" />
+              ) : (
+                <EyeOff className="w-4 h-4 text-white" />
+              )}
             </button>
           )}
         </div>

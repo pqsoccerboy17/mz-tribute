@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Play, Image as ImageIcon, EyeOff, RotateCw } from 'lucide-react'
+import { Play, Image as ImageIcon, EyeOff, RotateCw, Loader2, Check } from 'lucide-react'
 import { motion } from 'motion/react'
 import type { Memory } from '../../lib/types'
 import { Container } from '../layout/Container'
@@ -65,33 +65,58 @@ function VideoGridItem({ item, index, onClick }: { item: GalleryItem; index: num
 function AdminGalleryOverlay({ item }: { item: GalleryItem }) {
   const { hideMemory } = useAdminActions()
   const [confirmHide, setConfirmHide] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
 
-  function handleHide(e: React.MouseEvent) {
+  async function handleHide(e: React.MouseEvent) {
     e.stopPropagation()
+    if (loading || success) return
     if (confirmHide) {
-      hideMemory(item.memoryId)
       setConfirmHide(false)
+      setLoading(true)
+      const ok = await hideMemory(item.memoryId)
+      setLoading(false)
+      if (ok) {
+        setSuccess(true)
+        setTimeout(() => setSuccess(false), 800)
+      }
     } else {
       setConfirmHide(true)
-      setTimeout(() => setConfirmHide(false), 2000)
+      setTimeout(() => setConfirmHide(false), 3000)
     }
   }
 
   return (
-    <div className="absolute top-1.5 right-1.5 flex gap-1 z-10">
-      <button
-        onClick={handleHide}
-        className={cn(
-          'w-6 h-6 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors cursor-pointer',
-          confirmHide
-            ? 'bg-red-500/80 hover:bg-red-500'
-            : 'bg-navy/80 hover:bg-navy'
-        )}
-        title={confirmHide ? 'Tap again to hide' : 'Hide memory'}
-      >
-        <EyeOff className={cn('w-3 h-3', confirmHide ? 'text-white' : 'text-text-muted')} />
-      </button>
-    </div>
+    <>
+      {/* Full-item overlay while hiding */}
+      {(loading || success) && (
+        <div className={cn(
+          'absolute inset-0 z-20 flex items-center justify-center rounded-lg transition-opacity',
+          loading ? 'bg-navy/70' : 'bg-pitch-green/30'
+        )}>
+          {loading ? (
+            <Loader2 className="w-6 h-6 text-cream animate-spin" />
+          ) : (
+            <Check className="w-6 h-6 text-pitch-green" />
+          )}
+        </div>
+      )}
+      <div className="absolute top-1.5 right-1.5 flex gap-1 z-10">
+        <button
+          onClick={handleHide}
+          disabled={loading || success}
+          className={cn(
+            'w-8 h-8 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors cursor-pointer',
+            confirmHide
+              ? 'bg-red-500/80 hover:bg-red-500'
+              : 'bg-navy/80 hover:bg-navy'
+          )}
+          title={confirmHide ? 'Tap again to hide' : 'Hide memory'}
+        >
+          <EyeOff className={cn('w-4 h-4', confirmHide ? 'text-white' : 'text-text-muted')} />
+        </button>
+      </div>
+    </>
   )
 }
 
@@ -110,10 +135,10 @@ function AdminRotateOverlay({ item }: { item: GalleryItem }) {
     <div className="absolute top-1.5 left-1.5 z-10">
       <button
         onClick={handleRotate}
-        className="w-6 h-6 flex items-center justify-center bg-navy/80 backdrop-blur-sm rounded-full hover:bg-navy transition-colors cursor-pointer"
+        className="w-8 h-8 flex items-center justify-center bg-navy/80 backdrop-blur-sm rounded-full hover:bg-navy transition-colors cursor-pointer"
         title="Rotate photo"
       >
-        <RotateCw className="w-3 h-3 text-text-muted" />
+        <RotateCw className="w-4 h-4 text-text-muted" />
       </button>
     </div>
   )
@@ -121,20 +146,29 @@ function AdminRotateOverlay({ item }: { item: GalleryItem }) {
 
 function AdminUnhideOverlay({ item }: { item: GalleryItem }) {
   const { showMemory } = useAdminActions()
+  const [loading, setLoading] = useState(false)
 
-  function handleUnhide(e: React.MouseEvent) {
+  async function handleUnhide(e: React.MouseEvent) {
     e.stopPropagation()
-    showMemory(item.memoryId)
+    if (loading) return
+    setLoading(true)
+    await showMemory(item.memoryId)
+    setLoading(false)
   }
 
   return (
     <div className="absolute bottom-1.5 right-1.5 z-10">
       <button
         onClick={handleUnhide}
-        className="w-6 h-6 flex items-center justify-center bg-pitch-green/80 backdrop-blur-sm rounded-full hover:bg-pitch-green transition-colors cursor-pointer"
+        disabled={loading}
+        className="w-8 h-8 flex items-center justify-center bg-pitch-green/80 backdrop-blur-sm rounded-full hover:bg-pitch-green transition-colors cursor-pointer"
         title="Unhide"
       >
-        <EyeOff className="w-3 h-3 text-white" />
+        {loading ? (
+          <Loader2 className="w-4 h-4 text-white animate-spin" />
+        ) : (
+          <EyeOff className="w-4 h-4 text-white" />
+        )}
       </button>
     </div>
   )
