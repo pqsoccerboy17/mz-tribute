@@ -110,19 +110,6 @@ export function AboutMZ() {
               </div>
             ))}
           </div>
-
-          {/* YNWA quote -- stadium banner style */}
-          <div className="relative py-8">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-bvb-yellow/[0.03] to-transparent rounded-xl" />
-            <blockquote className="relative border-l-[3px] border-bvb-yellow pl-6 py-2">
-              <p className="font-display text-2xl sm:text-3xl italic text-cream leading-snug">
-                "You'll Never Walk Alone"
-              </p>
-              <cite className="text-bvb-yellow/50 text-sm mt-3 block not-italic">
-                MZ's last message -- from the BVB stands in Dortmund, March 2026
-              </cite>
-            </blockquote>
-          </div>
         </div>
       </div>
     </Container>
