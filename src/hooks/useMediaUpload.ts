@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
-import { STORAGE_BUCKET, MAX_FILE_SIZE_BYTES } from '../lib/constants'
+import { STORAGE_BUCKET, MAX_FILE_SIZE_BYTES, ACCEPTED_MIME_PREFIXES } from '../lib/constants'
 
 interface UploadResult {
   url: string
@@ -17,6 +17,11 @@ export function useMediaUpload() {
     async (file: File): Promise<UploadResult | null> => {
       if (file.size > MAX_FILE_SIZE_BYTES) {
         setError(`File ${file.name} exceeds 50MB limit`)
+        return null
+      }
+
+      if (!ACCEPTED_MIME_PREFIXES.some((prefix) => file.type.startsWith(prefix))) {
+        setError(`File ${file.name} is not a supported image or video format`)
         return null
       }
 

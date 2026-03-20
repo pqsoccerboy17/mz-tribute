@@ -1,9 +1,22 @@
 import { useState, useRef, type FormEvent } from 'react'
 import { X, Upload, Check, Loader2 } from 'lucide-react'
-import { ERAS, MAX_FILES, MAX_FILE_SIZE_MB } from '../../lib/constants'
+import { ERAS, MAX_FILES, MAX_FILE_SIZE_MB, MAX_AUTHOR_LENGTH, MAX_CONTENT_LENGTH, SUBMISSION_COOLDOWN_MS, ACCEPTED_MIME_PREFIXES } from '../../lib/constants'
 import { useMediaUpload } from '../../hooks/useMediaUpload'
 import { cn } from '../../lib/utils'
 import type { MemoryInsert } from '../../lib/types'
+
+const COOLDOWN_KEY = 'mz-tribute-last-submit'
+
+function getCooldownRemaining(): number {
+  const last = localStorage.getItem(COOLDOWN_KEY)
+  if (!last) return 0
+  const elapsed = Date.now() - Number(last)
+  return Math.max(0, SUBMISSION_COOLDOWN_MS - elapsed)
+}
+
+function isValidMediaType(file: File): boolean {
+  return ACCEPTED_MIME_PREFIXES.some((prefix) => file.type.startsWith(prefix))
+}
 
 interface SubmitMemoryProps {
   isOpen: boolean
@@ -27,9 +40,22 @@ export function SubmitMemory({ isOpen, onClose, onSubmit }: SubmitMemoryProps) {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files || [])
-    const valid = selected.filter(
-      (f) => f.size <= MAX_FILE_SIZE_MB * 1024 * 1024
-    )
+    const rejected: string[] = []
+    const valid = selected.filter((f) => {
+      if (!isValidMediaType(f)) {
+        rejected.push(`${f.name} (unsupported format)`)
+        return false
+      }
+      if (f.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        rejected.push(`${f.name} (exceeds ${MAX_FILE_SIZE_MB}MB)`)
+        return false
+      }
+      return true
+    })
+    if (rejected.length > 0) {
+      setErrorMsg(`Rejected: ${rejected.join(', ')}`)
+      setState('error')
+    }
     setFiles((prev) => [...prev, ...valid].slice(0, MAX_FILES))
   }
 
@@ -41,6 +67,15 @@ export function SubmitMemory({ isOpen, onClose, onSubmit }: SubmitMemoryProps) {
     e.preventDefault()
     if (!name.trim()) return
 
+    // Check cooldown
+    const remaining = getCooldownRemaining()
+    if (remaining > 0) {
+      const secs = Math.ceil(remaining / 1000)
+      setState('error')
+      setErrorMsg(`Please wait ${secs} seconds before submitting again.`)
+      return
+    }
+
     try {
       let mediaUrls: string[] = []
 
@@ -51,11 +86,14 @@ export function SubmitMemory({ isOpen, onClose, onSubmit }: SubmitMemoryProps) {
 
       setState('submitting')
       await onSubmit({
-        author_name: name.trim(),
-        content: content.trim() || null,
+        author_name: name.trim().slice(0, MAX_AUTHOR_LENGTH),
+        content: content.trim().slice(0, MAX_CONTENT_LENGTH) || null,
         media_urls: mediaUrls,
         era: era || undefined,
       })
+
+      // Record submission time for cooldown
+      localStorage.setItem(COOLDOWN_KEY, String(Date.now()))
 
       setState('success')
 
@@ -124,6 +162,7 @@ export function SubmitMemory({ isOpen, onClose, onSubmit }: SubmitMemoryProps) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                maxLength={MAX_AUTHOR_LENGTH}
                 placeholder="How MZ knew you"
                 className="mt-1 w-full bg-navy border border-white/10 rounded-lg px-4 py-2.5 text-cream placeholder:text-text-muted focus:outline-none focus:border-ssu-blue transition-colors"
               />
@@ -131,11 +170,22 @@ export function SubmitMemory({ isOpen, onClose, onSubmit }: SubmitMemoryProps) {
 
             {/* Memory */}
             <label className="block mb-4">
-              <span className="text-text-secondary text-sm">Your Memory</span>
+              <div className="flex justify-between items-baseline">
+                <span className="text-text-secondary text-sm">Your Memory</span>
+                {content.length > MAX_CONTENT_LENGTH * 0.8 && (
+                  <span className={cn(
+                    'text-xs tabular-nums',
+                    content.length >= MAX_CONTENT_LENGTH ? 'text-terracotta' : 'text-text-muted'
+                  )}>
+                    {content.length}/{MAX_CONTENT_LENGTH}
+                  </span>
+                )}
+              </div>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={5}
+                maxLength={MAX_CONTENT_LENGTH}
                 placeholder="A story, a moment, something MZ said that stuck with you..."
                 className="mt-1 w-full bg-navy border border-white/10 rounded-lg px-4 py-2.5 text-cream placeholder:text-text-muted focus:outline-none focus:border-ssu-blue transition-colors resize-none"
               />

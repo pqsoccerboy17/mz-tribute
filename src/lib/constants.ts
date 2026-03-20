@@ -32,5 +32,15 @@ export const ACCEPTED_FILE_TYPES = {
   'video/quicktime': ['.mov'],
 }
 
+/** Accepted MIME type prefixes for upload validation */
+export const ACCEPTED_MIME_PREFIXES = ['image/', 'video/']
+
+/** Input length limits */
+export const MAX_AUTHOR_LENGTH = 100
+export const MAX_CONTENT_LENGTH = 5000
+
+/** Cooldown between submissions (ms) */
+export const SUBMISSION_COOLDOWN_MS = 120_000
+
 /** Supabase storage bucket name */
 export const STORAGE_BUCKET = 'tribute-media'
