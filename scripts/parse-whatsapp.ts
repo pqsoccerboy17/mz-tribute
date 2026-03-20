@@ -171,7 +171,11 @@ function parseChat(): ParsedMessage[] {
 
   let current: ParsedMessage | null = null
 
-  for (const line of lines) {
+  for (const rawLine of lines) {
+    // Strip Unicode directional marks (U+200E LTR, U+200F RTL) that WhatsApp
+    // prepends to timestamps. These break the regex, causing messages from
+    // different senders to merge into one card.
+    const line = rawLine.replace(/[\u200e\u200f]/g, '')
     const match = line.match(lineRegex)
 
     if (match) {
@@ -181,7 +185,7 @@ function parseChat(): ParsedMessage[] {
       const [, dateStr, timeStr, sender, text] = match
       const timestamp = new Date(`${dateStr} ${timeStr}`)
 
-      // Check for attachment
+      // Check for attachment (also strip Unicode marks from attachment tags)
       const attachMatch = text.match(/<attached:\s*(.+?)>/)
       const attachment = attachMatch ? attachMatch[1].trim() : null
       const cleanText = attachment
@@ -195,8 +199,11 @@ function parseChat(): ParsedMessage[] {
         attachment,
       }
     } else if (current && line.trim()) {
-      // Continuation line
-      current.text += '\n' + line.trim()
+      // Continuation line -- only if it doesn't look like a new message
+      // (safety check in case regex misses an edge case)
+      if (!/^\[?\d{1,2}\/\d{1,2}\/\d{2,4}/.test(line.trim())) {
+        current.text += '\n' + line.trim()
+      }
     }
   }
 
@@ -343,8 +350,12 @@ async function uploadStandaloneMedia(
 // Main import
 // ---------------------------------------------------------------------------
 
+const DRY_RUN = process.argv.includes('--dry-run')
+
 async function main() {
   loadEnv()
+
+  if (DRY_RUN) console.log('*** DRY RUN -- no database writes ***\n')
 
   const supabase = getSupabaseClient()
 
@@ -387,6 +398,13 @@ async function main() {
 
     const isFeatured = tribute.text.length >= FEATURED_THRESHOLD
 
+    if (DRY_RUN) {
+      console.log(`  [DRY] ${normalizeSender(tribute.sender)}: "${tribute.text.slice(0, 80)}..."`)
+      imported++
+      if (isFeatured) featured++
+      continue
+    }
+
     const { error } = await supabase.from('memories').insert({
       author_name: normalizeSender(tribute.sender),
       content: tribute.text,
@@ -394,7 +412,7 @@ async function main() {
       source: 'whatsapp',
       whatsapp_timestamp: tribute.timestamp.toISOString(),
       is_featured: isFeatured,
-      is_approved: true,
+      is_approved: false,
     })
 
     if (error) {
