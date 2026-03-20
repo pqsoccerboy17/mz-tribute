@@ -41,7 +41,7 @@ function VideoThumbnail({ url }: { url: string }) {
 export function MemoryCard({ memory, onSelect, browseIndex, index = 0 }: MemoryCardProps) {
   const [expanded, setExpanded] = useState(false)
   const { isAdmin } = useAdmin()
-  const { hideMemory, toggleFeatured } = useAdminActions()
+  const { hideMemory, showMemory, toggleFeatured } = useAdminActions()
   const [hideConfirm, setHideConfirm] = useState(false)
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -104,7 +104,7 @@ export function MemoryCard({ memory, onSelect, browseIndex, index = 0 }: MemoryC
               )}
             />
           </button>
-          {!isHidden && (
+          {!isHidden ? (
             <button
               onClick={handleHideClick}
               className={cn(
@@ -121,6 +121,14 @@ export function MemoryCard({ memory, onSelect, browseIndex, index = 0 }: MemoryC
                   hideConfirm ? 'text-white' : 'text-text-muted'
                 )}
               />
+            </button>
+          ) : (
+            <button
+              onClick={(e) => { e.stopPropagation(); showMemory(memory.id) }}
+              className="w-7 h-7 flex items-center justify-center bg-pitch-green/80 backdrop-blur-sm rounded-full hover:bg-pitch-green transition-colors cursor-pointer"
+              title="Unhide memory"
+            >
+              <EyeOff className="w-3.5 h-3.5 text-white" />
             </button>
           )}
         </div>

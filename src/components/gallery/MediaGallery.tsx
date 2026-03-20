@@ -119,6 +119,27 @@ function AdminRotateOverlay({ item }: { item: GalleryItem }) {
   )
 }
 
+function AdminUnhideOverlay({ item }: { item: GalleryItem }) {
+  const { showMemory } = useAdminActions()
+
+  function handleUnhide(e: React.MouseEvent) {
+    e.stopPropagation()
+    showMemory(item.memoryId)
+  }
+
+  return (
+    <div className="absolute bottom-1.5 right-1.5 z-10">
+      <button
+        onClick={handleUnhide}
+        className="w-6 h-6 flex items-center justify-center bg-pitch-green/80 backdrop-blur-sm rounded-full hover:bg-pitch-green transition-colors cursor-pointer"
+        title="Unhide"
+      >
+        <EyeOff className="w-3 h-3 text-white" />
+      </button>
+    </div>
+  )
+}
+
 export function MediaGallery({ memories }: MediaGalleryProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const { ref, isVisible } = useIntersection()
@@ -172,11 +193,14 @@ export function MediaGallery({ memories }: MediaGalleryProps) {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3">
           {items.map((item, i) => (
             <div key={i} className={cn('relative', !item.isApproved && isAdmin && 'opacity-50')}>
-              {/* Hidden badge for admin */}
+              {/* Hidden badge + unhide button for admin */}
               {isAdmin && !item.isApproved && (
-                <span className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 text-[9px] font-bold text-red-400 bg-red-400/15 border border-red-400/30 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
-                  Hidden
-                </span>
+                <>
+                  <span className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 text-[9px] font-bold text-red-400 bg-red-400/15 border border-red-400/30 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                    Hidden
+                  </span>
+                  <AdminUnhideOverlay item={item} />
+                </>
               )}
 
               {/* Admin overlays */}
