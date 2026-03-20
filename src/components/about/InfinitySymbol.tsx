@@ -19,7 +19,7 @@ export function InfinitySymbol({ isVisible = true }: InfinitySymbolProps) {
     >
       <svg
         viewBox="0 0 80 36"
-        className="w-16 h-7 sm:w-20 sm:h-9"
+        className="w-20 h-9 sm:w-28 sm:h-12"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         aria-label="Infinity"
@@ -29,7 +29,7 @@ export function InfinitySymbol({ isVisible = true }: InfinitySymbolProps) {
         <path
           d={INFINITY_PATH}
           stroke="var(--color-bvb-yellow)"
-          strokeWidth="2.5"
+          strokeWidth="3"
           strokeLinecap="round"
           opacity="0.08"
         />
@@ -40,7 +40,7 @@ export function InfinitySymbol({ isVisible = true }: InfinitySymbolProps) {
             d={INFINITY_PATH}
             className="infinity-glow"
             stroke="var(--color-bvb-yellow)"
-            strokeWidth="5"
+            strokeWidth="6"
             strokeLinecap="round"
             opacity="0.25"
           />
@@ -52,7 +52,7 @@ export function InfinitySymbol({ isVisible = true }: InfinitySymbolProps) {
             d={INFINITY_PATH}
             className="infinity-trace"
             stroke="var(--color-bvb-yellow)"
-            strokeWidth="2.5"
+            strokeWidth="3"
             strokeLinecap="round"
             opacity="0.9"
           />

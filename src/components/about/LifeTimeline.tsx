@@ -5,11 +5,11 @@ interface LifeTimelineProps {
 }
 
 const MILESTONES = [
-  { year: 1962, label: 'Born', coaching: false },
-  { year: 1983, label: 'Arrived at SSU', coaching: false },
-  { year: 1991, label: 'Head Coach', coaching: true },
-  { year: 2002, label: 'National Champions', coaching: true },
-  { year: 2026, label: 'Forever', coaching: true },
+  { year: 1962, label: 'Born', shortLabel: 'Born', coaching: false },
+  { year: 1983, label: 'Arrived at SSU', shortLabel: 'SSU', coaching: false },
+  { year: 1991, label: 'Head Coach', shortLabel: 'Coach', coaching: true },
+  { year: 2002, label: 'National Champions', shortLabel: 'Champions', coaching: true },
+  { year: 2026, label: 'Forever', shortLabel: 'Forever', coaching: true },
 ]
 
 const START_YEAR = 1962
@@ -42,13 +42,13 @@ function HorizontalTimeline({ isVisible }: { isVisible: boolean }) {
   const coachingStart = pct(COACHING_START)
 
   return (
-    <div className="relative h-20 mx-4">
+    <div className="relative h-24 mx-4">
       {/* Full life span line */}
-      <div className="absolute top-8 left-0 right-0 h-px bg-text-muted/30" />
+      <div className="absolute top-10 left-0 right-0 h-px bg-text-muted/30" />
 
       {/* Coaching years highlight */}
       <motion.div
-        className="absolute top-[30px] h-[3px] rounded-full bg-bvb-yellow/40"
+        className="absolute top-[38px] h-[3px] rounded-full bg-bvb-yellow/40"
         style={{ left: `${coachingStart}%`, right: '0%', transformOrigin: 'left' }}
         initial={{ scaleX: 0 }}
         animate={isVisible ? { scaleX: 1 } : { scaleX: 0 }}
@@ -66,22 +66,22 @@ function HorizontalTimeline({ isVisible }: { isVisible: boolean }) {
           transition={{ duration: 0.5, ease: 'easeOut', delay: 0.3 + i * 0.15 }}
         >
           {/* Year label */}
-          <span className="font-display text-xs text-bvb-yellow mb-1.5">
+          <span className="font-display text-sm text-bvb-yellow mb-2">
             {m.year === 1962 ? 'c.1962' : m.year}
           </span>
 
           {/* Dot */}
           <div
-            className={`w-2.5 h-2.5 rounded-full border-2 ${
+            className={`w-3 h-3 rounded-full border-2 ${
               m.coaching
                 ? 'bg-bvb-yellow border-bvb-yellow'
                 : 'bg-navy border-text-muted/60'
             }`}
           />
 
-          {/* Description */}
-          <span className="text-[9px] text-text-muted uppercase tracking-[0.12em] mt-1.5 whitespace-nowrap">
-            {m.label}
+          {/* Description -- short labels to prevent overlap */}
+          <span className="text-[11px] text-text-muted uppercase tracking-[0.12em] mt-2 whitespace-nowrap">
+            {m.shortLabel}
           </span>
         </motion.div>
       ))}
@@ -119,12 +119,12 @@ function VerticalTimeline({ isVisible }: { isVisible: boolean }) {
           >
             {/* Dot */}
             <div
-              className={`absolute -left-8 w-2.5 h-2.5 rounded-full border-2 ${
+              className={`absolute -left-8 w-3 h-3 rounded-full border-2 ${
                 m.coaching
                   ? 'bg-bvb-yellow border-bvb-yellow'
                   : 'bg-navy border-text-muted/60'
               }`}
-              style={{ transform: 'translateX(7px)' }}
+              style={{ transform: 'translateX(6px)' }}
             />
 
             {/* Year */}
@@ -132,8 +132,8 @@ function VerticalTimeline({ isVisible }: { isVisible: boolean }) {
               {m.year === 1962 ? 'c.1962' : m.year}
             </span>
 
-            {/* Label */}
-            <span className="text-[10px] text-text-muted uppercase tracking-[0.12em]">
+            {/* Label -- full labels on mobile where there's room */}
+            <span className="text-xs text-text-muted uppercase tracking-[0.12em]">
               {m.label}
             </span>
           </motion.div>
