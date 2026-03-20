@@ -60,7 +60,8 @@ export function MemoryDetail({ memories, currentIndex, onNavigate, onClose }: Me
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+          aria-label="Close"
+          className="absolute top-4 right-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
         >
           <X className="w-6 h-6 text-white" />
         </button>
@@ -72,7 +73,8 @@ export function MemoryDetail({ memories, currentIndex, onNavigate, onClose }: Me
               e.stopPropagation()
               goPrev()
             }}
-            className="absolute left-2 sm:left-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+            aria-label="Previous memory"
+            className="absolute left-2 sm:left-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-6 h-6 text-white" />
           </button>
@@ -85,7 +87,8 @@ export function MemoryDetail({ memories, currentIndex, onNavigate, onClose }: Me
               e.stopPropagation()
               goNext()
             }}
-            className="absolute right-2 sm:right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+            aria-label="Next memory"
+            className="absolute right-2 sm:right-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
           >
             <ChevronRight className="w-6 h-6 text-white" />
           </button>

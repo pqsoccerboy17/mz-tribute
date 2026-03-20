@@ -49,6 +49,7 @@ export function Header({ onSubmitClick, onAdminTrigger }: HeaderProps) {
         <button
           onClick={handleCrestClick}
           className="group flex items-center gap-2 cursor-pointer"
+          aria-label="Home"
         >
           <svg viewBox="0 0 28 34" className="w-6 h-7">
             <path
@@ -72,7 +73,7 @@ export function Header({ onSubmitClick, onAdminTrigger }: HeaderProps) {
           </svg>
         </button>
 
-        <nav className="hidden sm:flex items-center gap-6 text-sm text-text-secondary">
+        <nav className="flex items-center gap-3 sm:gap-6 text-xs sm:text-sm text-text-secondary">
           <button
             onClick={() => scrollTo('memories')}
             className="hover:text-bvb-yellow transition-colors cursor-pointer"
@@ -101,7 +102,7 @@ export function Header({ onSubmitClick, onAdminTrigger }: HeaderProps) {
 
         <button
           onClick={onSubmitClick}
-          className="bg-bvb-yellow/90 hover:bg-bvb-yellow text-navy text-sm font-semibold px-4 py-2 rounded-lg transition-all cursor-pointer shadow-[0_0_12px_rgba(253,225,0,0.15)] hover:shadow-[0_0_20px_rgba(253,225,0,0.25)]"
+          className="hidden sm:block bg-bvb-yellow/90 hover:bg-bvb-yellow text-navy text-sm font-semibold px-4 py-2 rounded-lg transition-all cursor-pointer shadow-[0_0_12px_rgba(253,225,0,0.15)] hover:shadow-[0_0_20px_rgba(253,225,0,0.25)]"
         >
           Share a Memory
         </button>

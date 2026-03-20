@@ -86,7 +86,8 @@ export function SubmitMemory({ isOpen, onClose, onSubmit }: SubmitMemoryProps) {
         {/* Close */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-navy-lighter transition-colors cursor-pointer"
+          aria-label="Close"
+          className="absolute top-4 right-4 p-3 rounded-full hover:bg-navy-lighter transition-colors cursor-pointer"
         >
           <X className="w-5 h-5 text-text-secondary" />
         </button>
@@ -179,9 +180,10 @@ export function SubmitMemory({ isOpen, onClose, onSubmit }: SubmitMemoryProps) {
                       <button
                         type="button"
                         onClick={() => removeFile(i)}
-                        className="text-text-muted hover:text-terracotta cursor-pointer"
+                        aria-label={`Remove ${file.name}`}
+                        className="p-1 text-text-muted hover:text-terracotta cursor-pointer rounded-full hover:bg-white/5"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
@@ -192,7 +194,8 @@ export function SubmitMemory({ isOpen, onClose, onSubmit }: SubmitMemoryProps) {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2 px-4 py-2 border border-dashed border-white/10 rounded-lg text-text-secondary text-sm hover:border-ssu-blue/50 hover:text-cream transition-colors cursor-pointer"
+                  aria-label="Add photos or videos"
+                  className="flex items-center gap-2 px-4 py-2.5 border border-dashed border-white/10 rounded-lg text-text-secondary text-sm hover:border-ssu-blue/50 hover:text-cream transition-colors cursor-pointer"
                 >
                   <Upload className="w-4 h-4" />
                   Add files

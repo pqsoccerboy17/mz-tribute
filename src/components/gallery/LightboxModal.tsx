@@ -62,7 +62,8 @@ export function LightboxModal({
         {/* Close */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+          aria-label="Close"
+          className="absolute top-4 right-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
         >
           <X className="w-6 h-6 text-white" />
         </button>
@@ -84,7 +85,8 @@ export function LightboxModal({
               e.stopPropagation()
               goPrev()
             }}
-            className="absolute left-2 sm:left-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+            aria-label="Previous"
+            className="absolute left-2 sm:left-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-6 h-6 text-white" />
           </button>
@@ -97,7 +99,8 @@ export function LightboxModal({
               e.stopPropagation()
               goNext()
             }}
-            className="absolute right-2 sm:right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+            aria-label="Next"
+            className="absolute right-2 sm:right-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
           >
             <ChevronRight className="w-6 h-6 text-white" />
           </button>
@@ -109,7 +112,7 @@ export function LightboxModal({
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.2 }}
-          className="max-w-5xl max-h-[85vh] w-full flex items-center justify-center px-12"
+          className="max-w-5xl max-h-[85vh] w-full flex items-center justify-center px-4 sm:px-12"
           onClick={(e) => e.stopPropagation()}
         >
           {item.type === 'video' ? (

@@ -36,10 +36,10 @@ export function SpotifyEmbed() {
             <iframe
               src={`https://open.spotify.com/embed/playlist/${SPOTIFY_PLAYLIST_ID}?utm_source=generator&theme=0`}
               width="100%"
-              height="380"
+              height="352"
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
-              className="border-0"
+              className="border-0 sm:h-[380px]"
               title="The Sonoma State Sound - Spotify Playlist"
             />
           </div>

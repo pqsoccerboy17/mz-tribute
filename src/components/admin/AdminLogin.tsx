@@ -42,7 +42,8 @@ export function AdminLogin({ isOpen, onClose }: AdminLoginProps) {
       >
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-navy-lighter transition-colors cursor-pointer"
+          aria-label="Close"
+          className="absolute top-3 right-3 p-3 rounded-full hover:bg-navy-lighter transition-colors cursor-pointer"
         >
           <X className="w-4 h-4 text-text-secondary" />
         </button>
