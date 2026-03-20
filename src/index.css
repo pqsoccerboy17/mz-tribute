@@ -64,6 +64,11 @@ body {
   min-height: 100vh;
 }
 
+/* Offset anchor scroll targets below the fixed header */
+section[id] {
+  scroll-margin-top: 80px;
+}
+
 /* Keyboard focus indicator -- BVB yellow ring */
 :focus-visible {
   outline: 2px solid var(--color-bvb-yellow);
