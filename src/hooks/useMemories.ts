@@ -62,7 +62,7 @@ export function useMemories(includeHidden = false) {
       try {
         const { data, error: insertError } = await supabase
           .from('memories')
-          .insert({ ...memory, source: 'web', is_approved: false })
+          .insert({ ...memory, source: 'web' })
           .select()
           .single()
 
