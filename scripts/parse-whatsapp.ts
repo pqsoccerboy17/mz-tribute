@@ -10,7 +10,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import { readFileSync, existsSync, mkdirSync, readdirSync } from 'fs'
+import { readFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs'
 import { execSync } from 'child_process'
 import { join, dirname, extname } from 'path'
 import { fileURLToPath } from 'url'
@@ -23,15 +23,21 @@ import { readdir } from 'fs/promises'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const PROJECT_ROOT = join(__dirname, '..')
 
-// Find the zip by pattern (filename has Unicode chars that vary by OS)
+// Find the newest WhatsApp zip by modification time
 function findZip(): string {
   const files = readdirSync(PROJECT_ROOT)
-  const zip = files.find((f) => f.startsWith('WhatsApp') && f.endsWith('.zip'))
-  if (!zip) {
+  const zips = files
+    .filter((f) => f.startsWith('WhatsApp') && f.endsWith('.zip'))
+    .map((f) => ({ name: f, mtime: statSync(join(PROJECT_ROOT, f)).mtimeMs }))
+    .sort((a, b) => b.mtime - a.mtime)
+
+  if (zips.length === 0) {
     console.error('No WhatsApp .zip export found in project root')
     process.exit(1)
   }
-  return join(PROJECT_ROOT, zip)
+
+  console.log(`Found ${zips.length} zip(s), using newest: ${zips[0].name}`)
+  return join(PROJECT_ROOT, zips[0].name)
 }
 
 const ZIP_PATH = findZip()
@@ -347,15 +353,126 @@ async function uploadStandaloneMedia(
 }
 
 // ---------------------------------------------------------------------------
+// Upload standalone media -- incremental (skip already-imported)
+// ---------------------------------------------------------------------------
+
+async function uploadStandaloneMediaIncremental(
+  supabase: ReturnType<typeof createClient>,
+  messages: ParsedMessage[],
+  existingKeys: Set<string>
+) {
+  const mediaMessages = messages.filter(
+    (msg) =>
+      msg.timestamp >= TRIBUTE_START &&
+      msg.attachment &&
+      msg.text.length < MIN_MESSAGE_LENGTH &&
+      !MEDIA_OMITTED.some((p) => msg.text.includes(p))
+  )
+
+  // Filter out already-imported media
+  const newMedia = mediaMessages.filter(
+    (msg) => !isAlreadyImported(existingKeys, msg.sender, msg.timestamp)
+  )
+
+  console.log(
+    `\nStandalone media: ${mediaMessages.length} total, ${newMedia.length} new`
+  )
+
+  let uploaded = 0
+  for (const msg of newMedia) {
+    if (!msg.attachment) continue
+
+    if (DRY_RUN) {
+      console.log(`  [NEW MEDIA] ${normalizeSender(msg.sender)}: ${msg.attachment}`)
+      uploaded++
+      continue
+    }
+
+    const url = await uploadMedia(supabase, msg.attachment)
+    if (!url) continue
+
+    const { error } = await supabase.from('memories').insert({
+      author_name: normalizeSender(msg.sender),
+      content: msg.text || null,
+      media_urls: [url],
+      source: 'whatsapp',
+      whatsapp_timestamp: msg.timestamp.toISOString(),
+      is_featured: false,
+      is_approved: true,
+    })
+
+    if (error) {
+      console.warn(`  Failed to insert media memory: ${error.message}`)
+    } else {
+      uploaded++
+    }
+  }
+
+  console.log(`  Uploaded ${uploaded} new standalone media memories.`)
+}
+
+// ---------------------------------------------------------------------------
+// Incremental import: fetch existing records to skip duplicates
+// ---------------------------------------------------------------------------
+
+function makeDedupeKey(author: string, timestamp: string): string {
+  return `${author}|${timestamp}`
+}
+
+async function fetchExistingKeys(
+  supabase: ReturnType<typeof createClient>
+): Promise<Set<string>> {
+  const keys = new Set<string>()
+  let offset = 0
+  const PAGE_SIZE = 1000
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('memories')
+      .select('author_name, whatsapp_timestamp')
+      .eq('source', 'whatsapp')
+      .range(offset, offset + PAGE_SIZE - 1)
+
+    if (error) {
+      console.error('Failed to fetch existing memories:', error.message)
+      process.exit(1)
+    }
+
+    if (!data || data.length === 0) break
+
+    for (const row of data) {
+      if (row.whatsapp_timestamp) {
+        keys.add(makeDedupeKey(row.author_name, new Date(row.whatsapp_timestamp).toISOString()))
+      }
+    }
+
+    offset += PAGE_SIZE
+    if (data.length < PAGE_SIZE) break
+  }
+
+  return keys
+}
+
+function isAlreadyImported(
+  existingKeys: Set<string>,
+  sender: string,
+  timestamp: Date
+): boolean {
+  return existingKeys.has(makeDedupeKey(normalizeSender(sender), timestamp.toISOString()))
+}
+
+// ---------------------------------------------------------------------------
 // Main import
 // ---------------------------------------------------------------------------
 
 const DRY_RUN = process.argv.includes('--dry-run')
+const INCREMENTAL = process.argv.includes('--incremental')
 
 async function main() {
   loadEnv()
 
   if (DRY_RUN) console.log('*** DRY RUN -- no database writes ***\n')
+  if (INCREMENTAL) console.log('*** INCREMENTAL MODE -- skipping existing records ***\n')
 
   const supabase = getSupabaseClient()
 
@@ -383,23 +500,40 @@ async function main() {
   })
   console.log(`  Media files in export: ${mediaFiles.length}`)
 
+  // Step 4b: If incremental, fetch existing records for dedup
+  let existingKeys = new Set<string>()
+  if (INCREMENTAL) {
+    console.log('\nFetching existing records for dedup...')
+    existingKeys = await fetchExistingKeys(supabase)
+    console.log(`  Found ${existingKeys.size} existing records in database`)
+  }
+
   // Step 5: Import tribute messages
   console.log('\nImporting tribute messages...')
   let imported = 0
   let featured = 0
+  let skipped = 0
 
   for (const tribute of tributes) {
+    // Skip if already in DB (incremental mode)
+    if (INCREMENTAL && isAlreadyImported(existingKeys, tribute.sender, tribute.timestamp)) {
+      skipped++
+      continue
+    }
+
     // Upload attachment if present
     let mediaUrls: string[] = []
     if (tribute.attachment) {
-      const url = await uploadMedia(supabase, tribute.attachment)
-      if (url) mediaUrls = [url]
+      if (!DRY_RUN) {
+        const url = await uploadMedia(supabase, tribute.attachment)
+        if (url) mediaUrls = [url]
+      }
     }
 
     const isFeatured = tribute.text.length >= FEATURED_THRESHOLD
 
     if (DRY_RUN) {
-      console.log(`  [DRY] ${normalizeSender(tribute.sender)}: "${tribute.text.slice(0, 80)}..."`)
+      console.log(`  [NEW] ${normalizeSender(tribute.sender)}: "${tribute.text.slice(0, 80)}..."`)
       imported++
       if (isFeatured) featured++
       continue
@@ -424,14 +558,20 @@ async function main() {
   }
 
   console.log(`  Imported: ${imported} tributes (${featured} featured)`)
+  if (INCREMENTAL) console.log(`  Skipped (already in DB): ${skipped}`)
 
-  // Step 6: Upload standalone media
-  await uploadStandaloneMedia(supabase, allMessages)
+  // Step 6: Upload standalone media (with incremental dedup)
+  if (INCREMENTAL) {
+    await uploadStandaloneMediaIncremental(supabase, allMessages, existingKeys)
+  } else {
+    await uploadStandaloneMedia(supabase, allMessages)
+  }
 
   // Summary
   console.log('\n--- Import Complete ---')
   console.log(`  Messages parsed: ${allMessages.length}`)
   console.log(`  Tributes imported: ${imported}`)
+  if (INCREMENTAL) console.log(`  Tributes skipped (existing): ${skipped}`)
   console.log(`  Featured: ${featured}`)
   console.log(`  Media files available: ${mediaFiles.length}`)
   console.log('\nDone. Check your Supabase dashboard to verify.')

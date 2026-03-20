@@ -191,6 +191,7 @@ body {
   animation: fade-in-up 0.6s ease-out forwards;
 }
 
+/* Continuous/looping animations -- respect motion preferences */
 @keyframes pulse-glow {
   0%, 100% {
     box-shadow: 0 0 0 0 rgba(253, 225, 0, 0.4);
@@ -200,20 +201,11 @@ body {
   }
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
 @keyframes bounce-subtle {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(8px); }
 }
 
-.animate-bounce-subtle {
-  animation: bounce-subtle 2s ease-in-out infinite;
-}
-
-/* Stadium lights flicker */
 @keyframes flicker {
   0%, 100% { opacity: 1; }
   92% { opacity: 1; }
@@ -223,35 +215,43 @@ body {
   97% { opacity: 1; }
 }
 
-.animate-flicker {
-  animation: flicker 8s ease-in-out infinite;
-}
-
-/* Slow horizontal drift for atmosphere */
 @keyframes drift {
   0%, 100% { transform: translateX(0); }
   50% { transform: translateX(10px); }
 }
 
-.animate-drift {
-  animation: drift 20s ease-in-out infinite;
-}
-
-/* Infinity lemniscate -- golden comet tracing the eternal path */
 @keyframes infinity-flow {
   0% { stroke-dashoffset: 0; }
   100% { stroke-dashoffset: -190; }
 }
 
-.infinity-trace {
-  stroke-dasharray: 30 160;
-  animation: infinity-flow 4.5s linear infinite;
-}
+@media (prefers-reduced-motion: no-preference) {
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
 
-.infinity-glow {
-  stroke-dasharray: 30 160;
-  animation: infinity-flow 4.5s linear infinite;
-  filter: blur(3px);
+  .animate-bounce-subtle {
+    animation: bounce-subtle 2s ease-in-out infinite;
+  }
+
+  .animate-flicker {
+    animation: flicker 8s ease-in-out infinite;
+  }
+
+  .animate-drift {
+    animation: drift 20s ease-in-out infinite;
+  }
+
+  .infinity-trace {
+    stroke-dasharray: 30 160;
+    animation: infinity-flow 4.5s linear infinite;
+  }
+
+  .infinity-glow {
+    stroke-dasharray: 30 160;
+    animation: infinity-flow 4.5s linear infinite;
+    filter: blur(3px);
+  }
 }
 
 /* ============================================
@@ -376,5 +376,10 @@ body {
     var(--color-navy-lighter) 75%
   );
   background-size: 200% 100%;
-  animation: shimmer 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .thumbnail-shimmer {
+    animation: shimmer 2s ease-in-out infinite;
+  }
 }

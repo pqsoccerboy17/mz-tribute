@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { AdminProvider } from './contexts/AdminContext'
 import { RefetchProvider } from './contexts/RefetchContext'
 import { useAdmin } from './hooks/useAdmin'
@@ -109,8 +110,10 @@ function AppContent() {
 
 export function App() {
   return (
-    <AdminProvider>
-      <AppContent />
-    </AdminProvider>
+    <ErrorBoundary>
+      <AdminProvider>
+        <AppContent />
+      </AdminProvider>
+    </ErrorBoundary>
   )
 }

@@ -5,7 +5,7 @@ import { MemoryDetail } from './MemoryDetail'
 import { MemoryFilter } from './MemoryFilter'
 import { Container } from '../layout/Container'
 import { useIntersection } from '../../hooks/useIntersection'
-import { cn } from '../../lib/utils'
+import { cn, isVideoUrl } from '../../lib/utils'
 
 interface MemoryWallProps {
   memories: Memory[]
@@ -23,11 +23,11 @@ export function MemoryWall({ memories, loading }: MemoryWallProps) {
       return memories.filter((m) => m.content && m.content.length > 50)
     if (filter === 'photos')
       return memories.filter((m) =>
-        m.media_urls.some((url) => !url.match(/\.(mp4|mov|webm)$/i))
+        m.media_urls.some((url) => !isVideoUrl(url))
       )
     if (filter === 'videos')
       return memories.filter((m) =>
-        m.media_urls.some((url) => url.match(/\.(mp4|mov|webm)$/i))
+        m.media_urls.some((url) => isVideoUrl(url))
       )
     return memories
   }, [memories, filter])

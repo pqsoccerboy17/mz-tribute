@@ -30,6 +30,7 @@ export interface Memory {
   era: string | null
   is_featured: boolean
   is_approved: boolean
+  rotation: number
   created_at: string
   updated_at: string
 }
@@ -43,6 +44,7 @@ export interface MemoryInsert {
   era?: string | null
   is_featured?: boolean
   is_approved?: boolean
+  rotation?: number
 }
 
 export interface Media {

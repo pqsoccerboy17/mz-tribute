@@ -51,6 +51,7 @@ export function useMemories(includeHidden = false) {
           era: memory.era || null,
           is_featured: false,
           is_approved: true,
+          rotation: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }
@@ -61,7 +62,7 @@ export function useMemories(includeHidden = false) {
       try {
         const { data, error: insertError } = await supabase
           .from('memories')
-          .insert({ ...memory, source: 'web' })
+          .insert({ ...memory, source: 'web', is_approved: false })
           .select()
           .single()
 

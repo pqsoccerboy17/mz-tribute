@@ -1,7 +1,7 @@
 import { X, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import type { Memory } from '../../lib/types'
-import { formatDate } from '../../lib/utils'
+import { formatDate, isVideoUrl } from '../../lib/utils'
 import { useVideoThumbnail } from '../../hooks/useVideoThumbnail'
 import { useModalNavigation } from '../../hooks/useModalNavigation'
 
@@ -10,10 +10,6 @@ interface MemoryDetailProps {
   currentIndex: number
   onNavigate: (index: number) => void
   onClose: () => void
-}
-
-function isVideoUrl(url: string) {
-  return /\.(mp4|mov|webm)$/i.test(url)
 }
 
 function DetailVideo({ url }: { url: string }) {
@@ -131,8 +127,8 @@ export function MemoryDetail({ memories, currentIndex, onNavigate, onClose }: Me
           {/* Videos first -- full width */}
           {videos.length > 0 && (
             <div className="space-y-3 mb-4">
-              {videos.map((url, i) => (
-                <DetailVideo key={i} url={url} />
+              {videos.map((url) => (
+                <DetailVideo key={url} url={url} />
               ))}
             </div>
           )}
@@ -140,9 +136,9 @@ export function MemoryDetail({ memories, currentIndex, onNavigate, onClose }: Me
           {/* Photos in grid */}
           {photos.length > 0 && (
             <div className="grid grid-cols-2 gap-3">
-              {photos.map((url, i) => (
+              {photos.map((url) => (
                 <div
-                  key={i}
+                  key={url}
                   className="relative rounded-lg overflow-hidden bg-navy-lighter aspect-square ring-1 ring-white/5"
                 >
                   <img

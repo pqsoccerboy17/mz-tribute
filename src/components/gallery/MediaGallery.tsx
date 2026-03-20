@@ -226,7 +226,7 @@ export function MediaGallery({ memories }: MediaGalleryProps) {
         {/* Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3">
           {items.map((item, i) => (
-            <div key={i} className={cn('relative', !item.isApproved && isAdmin && 'opacity-50')}>
+            <div key={`${item.memoryId}-${item.url}`} className={cn('relative', !item.isApproved && isAdmin && 'opacity-50')}>
               {/* Hidden badge + unhide button for admin */}
               {isAdmin && !item.isApproved && (
                 <>

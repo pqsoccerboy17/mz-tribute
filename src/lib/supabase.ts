@@ -5,5 +5,4 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-/** Supabase is always configured in production (env vars set in Vercel) */
-export const isSupabaseConfigured = true
+export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey)
